@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Snake Pro</title>
+    <meta name="description" content="Advanced Snake Game with music, multiple food, obstacles, and multiplayer!">
+    <style>
+        :root {
+            --bg-main: #0d1b2a;
+            --bg-panel: rgba(0, 0, 0, 0.85);
+            --text-light: #e0e0e0;
+            --snake-head: #4CAF50;
+            --snake-body: #2E7D32;
+            --food-normal: #FF5252;
+            --food-gold: #FFD700;
+            --food-speed: #4FC3F7;
+            --food-poison: #9C27B0;
+            --obstacle: #5D4037;
+            --grid-line: #1b263b;
+        }
+        .theme-night {
+            --bg-main: #000000;
+            --bg-panel: rgba(10, 10, 20, 0.9);
+            --text-light: #ffffff;
+            --grid-line: #222;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            padding: 10px;
+            color: var(--text-light);
+        }
+        .game-container {
+            background-color: var(--bg-panel);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: var(--snake-head);
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+        }
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(30, 30, 30, 0.9);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: white;
+            font-size: 1.1rem;
+        }
+        #score, #high-score { font-weight: bold; }
+        #score { color: #FFD700; }
+        #high-score { color: #FF6B6B; }
+        .game-board {
+            background-color: var(--bg-main);
+            border: 2px solid var(--snake-head);
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        button {
+            background: linear-gradient(to bottom, var(--snake-head), #2E7D32);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .music-btn {
+            background: linear-gradient(to bottom, #9C27B0, #7B1FA2);
+        }
+        .instructions {
+            color: #ccc;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            border: 2px solid #FF5252;
+            box-shadow: 0 0 30px rgba(255, 82, 82, 0.6);
+            width: 85%;
+            max-width: 400px;
+        }
+        .game-over h2 {
+            color: #FF5252;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+        .final-score {
+            color: #FFD700;
+            font-size: 1.6rem;
+            margin: 12px 0;
+        }
+        .achievements {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #81C784;
+        }
+        .toggle {
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle.on { background: var(--snake-head); }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle.on::after { left: 26px; }
+        #mode-select {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        #mode-select h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 500px) {
+            .score-container { flex-direction: column; gap: 8px; }
+            .controls { gap: 6px; }
+            button { padding: 6px 12px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>SNAKE PRO</h1>
+        
+        <div class="score-container">
+            <div>Score: <span id="score">0</span></div>
+            <div>High Score: <span id="high-score">0</span></div>
+        </div>
+        
+        <canvas id="game-board" class="game-board" width="400" height="400"></canvas>
+        
+        <div class="controls">
+            <button id="start-btn">Start</button>
+            <button id="pause-btn">Pause</button>
+            <button id="music-btn" class="music-btn">🔊 Music</button>
+            <button id="theme-btn">🌙 Night</button>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.85rem;">
+                <span>Warp</span>
+                <div class="toggle" id="warp-toggle"></div>
+            </label>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>1P:</strong> WASD/Arrows &nbsp; <strong>2P:</strong> IJKL</p>
+            <p>🍎 Red: +10 &nbsp; 💊 Purple: -20 &nbsp; ⚡ Blue: Speed &nbsp; 🥇 Gold: +50</p>
+        </div>
+    </div>
+    
+    <div id="mode-select">
+        <h2>Choose Mode</h2>
+        <button id="mode-1p">Single Player</button>
+        <button id="mode-2p" style="background:linear-gradient(to bottom,#2196F3,#0D47A1);margin-top:10px;">Two Players</button>
+    </div>
+    
+    <div class="game-over" id="game-over">
+        <h2>GAME OVER!</h2>
+        <p class="final-score">Score: <span id="final-score">0</span></p>
+        <div class="achievements" id="achievements"></div>
+        <button id="restart-btn">Play Again</button>
+        <button id="share-btn" style="margin-top:10px;background:linear-gradient(to bottom,#2196F3,#0D47A1);">Share</button>
+    </div>
+
+    <script>
+        // ======================
+        // Audio System (Music + SFX)
+        // ======================
+        let audioContext = null;
+        let backgroundOscillator = null;
+        let isMusicOn = localStorage.getItem('snakeMusic') !== 'false';
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(frequency, duration, type = 'sine') {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function startBackgroundMusic() {
+            if (!isMusicOn || !audioContext) return;
+            stopBackgroundMusic();
+            
+            backgroundOscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            backgroundOscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Simple chiptune-style melody loop
+            const melody = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+            let index = 0;
+            backgroundOscillator.type = 'square';
+            backgroundOscillator.frequency.setValueAtTime(melody[index], audioContext.currentTime);
+            
+            function scheduleNext() {
+                if (!isMusicOn || !backgroundOscillator) return;
+                index = (index + 1) % melody.length;
+                backgroundOscillator.frequency.setValueAtTime(melody[index], audioContext.currentTime + 0.4);
+                setTimeout(scheduleNext, 400);
+            }
+            
+            backgroundOscillator.start();
+            scheduleNext();
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundOscillator) {
+                backgroundOscillator.stop();
+                backgroundOscillator = null;
+            }
+        }
+
+        // ======================
+        // Game Constants
+        // ======================
+        const canvas = document.getElementById('game-board');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const gridWidth = canvas.width / gridSize;
+        const gridHeight = canvas.height / gridSize;
+        const baseSpeed = 150;
+        let speed = baseSpeed;
+        let lastTime = 0;
+        let warpMode = false;
+
+        // DOM Elements
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('high-score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const achievementsDisplay = document.getElementById('achievements');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const musicBtn = document.getElementById('music-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const gameOverScreen = document.getElementById('game-over');
+        const themeBtn = document.getElementById('theme-btn');
+        const warpToggle = document.getElementById('warp-toggle');
+        const modeSelect = document.getElementById('mode-select');
+        const mode1P = document.getElementById('mode-1p');
+        const mode2P = document.getElementById('mode-2p');
+
+        // Game State
+        let snake1 = [];
+        let snake2 = [];
+        let food = [];
+        let obstacles = [];
+        let direction1 = 'right';
+        let nextDirection1 = 'right';
+        let direction2 = 'up';
+        let nextDirection2 = 'up';
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') ? parseInt(localStorage.getItem('snakeHighScore')) : 0;
+        let gameRunning = false;
+        let gamePaused = false;
+        let isMultiplayer = false;
+        let speedBoostUntil = 0;
+        let achievements = JSON.parse(localStorage.getItem('snakeAchievements') || '{}');
+        let gameLoop = null;
+
+        // Initialize UI
+        highScoreDisplay.textContent = highScore;
+        document.body.classList.toggle('theme-night', localStorage.getItem('snakeTheme') === 'night');
+        themeBtn.textContent = localStorage.getItem('snakeTheme') === 'night' ? '☀️ Day' : '🌙 Night';
+        warpMode = localStorage.getItem('snakeWarp') === 'true';
+        warpToggle.classList.toggle('on', warpMode);
+        musicBtn.textContent = isMusicOn ? '🔊 Music' : '🔇 Mute';
+        modeSelect.style.display = 'none';
+
+        // ======================
+        // Colors for Canvas
+        // ======================
+        const COLORS = {
+            bgMain: '#0d1b2a',
+            bgMainNight: '#000000',
+            gridLine: '#1b263b',
+            gridLineNight: '#222',
+            obstacle: '#5D4037',
+            snakeHead1: '#4CAF50',
+            snakeBody1: '#2E7D32',
+            snakeHead2: '#2196F3',
+            snakeBody2: '#0D47A1',
+            foodNormal: '#FF5252',
+            foodGold: '#FFD700',
+            foodSpeed: '#4FC3F7',
+            foodPoison: '#9C27B0'
+        };
+
+        // ======================
+        // Game Functions
+        // ======================
+
+        function initGame() {
+            initAudio();
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+            snake1 = [{x: 5, y: 10}, {x: 4, y: 10}, {x: 3, y: 10}];
+            snake2 = isMultiplayer ? [{x: 15, y: 10}, {x: 16, y: 10}, {x: 17, y: 10}] : [];
+            food = [];
+            obstacles = [];
+            generateObstacles();
+            // Generate more initial food
+            const foodCount = isMultiplayer ? 4 : 3;
+            for (let i = 0; i < foodCount; i++) {
+                generateFood();
+            }
+            direction1 = 'right'; nextDirection1 = 'right';
+            direction2 = 'left'; nextDirection2 = 'left';
+            score = 0;
+            speed = baseSpeed;
+            speedBoostUntil = 0;
+            scoreDisplay.textContent = score;
+            gameRunning = true;
+            gamePaused = false;
+            pauseBtn.textContent = 'Pause';
+            gameOverScreen.style.display = 'none';
+            lastTime = performance.now();
+            
+            if (isMusicOn) startBackgroundMusic();
+            gameLoop = requestAnimationFrame(gameStep);
+        }
+
+        function generateObstacles() {
+            obstacles = [];
+            const level = Math.floor(score / 50);
+            const count = Math.min(level * 2, 20);
+            for (let i = 0; i < count; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * gridWidth);
+                    y = Math.floor(Math.random() * gridHeight);
+                } while (
+                    snake1.some(s => s.x === x && s.y === y) ||
+                    (isMultiplayer && snake2.some(s => s.x === x && s.y === y)) ||
+                    obstacles.some(o => o.x === x && o.y === y) ||
+                    (x > 3 && x < 8 && y === 10) ||
+                    (isMultiplayer && x > 12 && x < 17 && y === 10)
+                );
+                obstacles.push({x, y});
+            }
+        }
+
+        function generateFood() {
+            // Allow more food: up to 5 (1P) or 6 (2P)
+            const maxFood = isMultiplayer ? 6 : 5;
+            if (food.length >= maxFood) return;
+
+            const types = ['normal', 'speed', 'poison'];
+            if (score >= 100) types.push('gold');
+            const type = types[Math.floor(Math.random() * types.length)];
+            let x, y;
+            let attempts = 0;
+            do {
+                x = Math.floor(Math.random() * gridWidth);
+                y = Math.floor(Math.random() * gridHeight);
+                attempts++;
+                if (attempts > 100) return;
+            } while (
+                snake1.some(s => s.x === x && s.y === y) ||
+                (isMultiplayer && snake2.some(s => s.x === x && s.y === y)) ||
+                obstacles.some(o => o.x === x && o.y === y) ||
+                food.some(f => f.x === x && f.y === y)
+            );
+            food.push({x, y, type, ttl: type === 'speed' ? 300 : Infinity});
+        }
+
+        function draw() {
+            const isNight = document.body.classList.contains('theme-night');
+            const bg = isNight ? COLORS.bgMainNight : COLORS.bgMain;
+            const grid = isNight ? COLORS.gridLineNight : COLORS.gridLine;
+
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = grid;
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    ctx.strokeRect(i * gridSize, j * gridSize, gridSize, gridSize);
+                }
+            }
+
+            ctx.fillStyle = COLORS.obstacle;
+            obstacles.forEach(obs => {
+                ctx.fillRect(obs.x * gridSize, obs.y * gridSize, gridSize, gridSize);
+                ctx.strokeStyle = bg;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(obs.x * gridSize, obs.y * gridSize, gridSize, gridSize);
+            });
+
+            snake1.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? COLORS.snakeHead1 : COLORS.snakeBody1;
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                ctx.strokeStyle = bg;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+            });
+
+            if (isMultiplayer) {
+                snake2.forEach((segment, index) => {
+                    ctx.fillStyle = index === 0 ? COLORS.snakeHead2 : COLORS.snakeBody2;
+                    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                    ctx.strokeStyle = bg;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                });
+            }
+
+            food.forEach(f => {
+                switch (f.type) {
+                    case 'normal': ctx.fillStyle = COLORS.foodNormal; break;
+                    case 'gold': ctx.fillStyle = COLORS.foodGold; break;
+                    case 'speed': ctx.fillStyle = COLORS.foodSpeed; break;
+                    case 'poison': ctx.fillStyle = COLORS.foodPoison; break;
+                }
+                ctx.beginPath();
+                ctx.arc(f.x * gridSize + gridSize/2, f.y * gridSize + gridSize/2, gridSize/2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                ctx.arc(f.x * gridSize + gridSize/3, f.y * gridSize + gridSize/3, gridSize/6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function update(delta) {
+            if (gamePaused) return;
+            if (speedBoostUntil > 0) {
+                speedBoostUntil -= delta;
+                if (speedBoostUntil <= 0) {
+                    speed = baseSpeed;
+                }
+            }
+
+            direction1 = nextDirection1;
+            if (isMultiplayer) direction2 = nextDirection2;
+
+            moveSnake(snake1, direction1, 1);
+            if (isMultiplayer) moveSnake(snake2, direction2, 2);
+
+            // Update food TTL
+            food = food.filter(f => {
+                if (f.ttl !== Infinity) f.ttl -= delta;
+                return f.ttl > 0;
+            });
+
+            // Spawn food more often
+            if (Math.random() < 0.05 && food.length < (isMultiplayer ? 6 : 5)) {
+                generateFood();
+            }
+        }
+
+        function moveSnake(snake, dir, playerId) {
+            const head = {...snake[0]};
+            switch (dir) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+
+            if (warpMode) {
+                if (head.x < 0) head.x = gridWidth - 1;
+                if (head.x >= gridWidth) head.x = 0;
+                if (head.y < 0) head.y = gridHeight - 1;
+                if (head.y >= gridHeight) head.y = 0;
+            }
+
+            if (!warpMode && (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight)) {
+                gameOver(playerId);
+                return;
+            }
+
+            if (snake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
+                gameOver(playerId);
+                return;
+            }
+
+            if (isMultiplayer) {
+                const otherSnake = playerId === 1 ? snake2 : snake1;
+                if (otherSnake.some(s => s.x === head.x && s.y === head.y)) {
+                    gameOver(playerId);
+                    return;
+                }
+            }
+
+            if (obstacles.some(o => o.x === head.x && o.y === head.y)) {
+                gameOver(playerId);
+                return;
+            }
+
+            snake.unshift(head);
+
+            let ate = false;
+            for (let i = food.length - 1; i >= 0; i--) {
+                const f = food[i];
+                if (f.x === head.x && f.y === head.y) {
+                    switch (f.type) {
+                        case 'normal':
+                            score += 10;
+                            playTone(523, 0.1);
+                            break;
+                        case 'gold':
+                            score += 50;
+                            playTone(784, 0.15);
+                            unlockAchievement('gold_hunter');
+                            break;
+                        case 'speed':
+                            speed = baseSpeed * 0.5;
+                            speedBoostUntil = 5000;
+                            playTone(659, 0.1);
+                            break;
+                        case 'poison':
+                            score = Math.max(0, score - 20);
+                            if (snake.length > 3) snake.pop();
+                            playTone(349, 0.2, 'square');
+                            break;
+                    }
+                    food.splice(i, 1);
+                    ate = true;
+                    // Immediately replace eaten food
+                    setTimeout(() => generateFood(), 100);
+                    break;
+                }
+            }
+
+            if (!ate) snake.pop();
+
+            scoreDisplay.textContent = score;
+            if (score > highScore) {
+                highScore = score;
+                highScoreDisplay.textContent = highScore;
+                localStorage.setItem('snakeHighScore', highScore);
+                unlockAchievement('high_score_master');
+            }
+
+            const newLevel = Math.floor(score / 50);
+            const oldLevel = Math.floor((score - (ate ? 10 : 0)) / 50);
+            if (newLevel > oldLevel) {
+                generateObstacles();
+                unlockAchievement('level_' + newLevel);
+            }
+        }
+
+        function gameOver(loserId) {
+            gameRunning = false;
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+            stopBackgroundMusic();
+            finalScoreDisplay.textContent = score;
+            checkAchievements();
+            showAchievements();
+            gameOverScreen.style.display = 'block';
+            playTone(220, 0.5, 'sawtooth');
+        }
+
+        function checkAchievements() {
+            if (score >= 100) unlockAchievement('century');
+            if (score >= 500) unlockAchievement('champion');
+        }
+
+        function unlockAchievement(key) {
+            if (!achievements[key]) {
+                achievements[key] = true;
+                localStorage.setItem('snakeAchievements', JSON.stringify(achievements));
+            }
+        }
+
+        function showAchievements() {
+            const achMap = {
+                century: 'Century Club! 🏆',
+                champion: 'Champion! 🌟',
+                gold_hunter: 'Gold Hunter! 🥇',
+                high_score_master: 'High Score Master! 🔥',
+                level_1: 'Level 1 Clear! 🧱',
+                level_2: 'Level 2 Clear! 🧱🧱'
+            };
+            const unlocked = Object.keys(achievements).filter(k => achievements[k] && achMap[k]);
+            achievementsDisplay.innerHTML = unlocked.length ? 
+                '<strong>Achievements:</strong><br>' + unlocked.map(k => achMap[k]).join('<br>') : 
+                '';
+        }
+
+        function gameStep(timestamp) {
+            const delta = timestamp - lastTime;
+            if (delta > speed) {
+                update(delta);
+                draw();
+                lastTime = timestamp;
+            }
+            if (gameRunning) {
+                gameLoop = requestAnimationFrame(gameStep);
+            }
+        }
+
+        // ======================
+        // Event Listeners
+        // ======================
+        startBtn.addEventListener('click', () => {
+            modeSelect.style.display = 'flex';
+        });
+
+        mode1P.addEventListener('click', () => {
+            isMultiplayer = false;
+            modeSelect.style.display = 'none';
+            initGame();
+        });
+
+        mode2P.addEventListener('click', () => {
+            isMultiplayer = true;
+            modeSelect.style.display = 'none';
+            initGame();
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (!gameRunning) return;
+            gamePaused = !gamePaused;
+            pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
+            if (!gamePaused) {
+                lastTime = performance.now();
+                gameLoop = requestAnimationFrame(gameStep);
+            }
+        });
+
+        musicBtn.addEventListener('click', () => {
+            isMusicOn = !isMusicOn;
+            localStorage.setItem('snakeMusic', isMusicOn);
+            musicBtn.textContent = isMusicOn ? '🔊 Music' : '🔇 Mute';
+            if (isMusicOn && gameRunning) {
+                startBackgroundMusic();
+            } else {
+                stopBackgroundMusic();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            modeSelect.style.display = 'flex';
+        });
+
+        shareBtn.addEventListener('click', () => {
+            const msg = `I scored ${score} in Snake Pro! Can you beat me?`;
+            if (navigator.share) {
+                navigator.share({ title: 'Snake Pro', text: msg });
+            } else {
+                navigator.clipboard.writeText(msg).then(() => {
+                    alert('Score copied!');
+                }).catch(() => {});
+            }
+        });
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('theme-night');
+            const isNight = document.body.classList.contains('theme-night');
+            localStorage.setItem('snakeTheme', isNight ? 'night' : 'day');
+            themeBtn.textContent = isNight ? '☀️ Day' : '🌙 Night';
+            draw();
+        });
+
+        warpToggle.addEventListener('click', () => {
+            warpMode = !warpMode;
+            warpToggle.classList.toggle('on', warpMode);
+            localStorage.setItem('snakeWarp', warpMode);
+        });
+
+        function handleKeydown(e) {
+            if (!gameRunning) return;
+            if (e.key.startsWith('Arrow') || ['w','a','s','d'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                switch (e.key) {
+                    case 'ArrowUp': case 'w': case 'W':
+                        if (direction1 !== 'down') nextDirection1 = 'up'; break;
+                    case 'ArrowDown': case 's': case 'S':
+                        if (direction1 !== 'up') nextDirection1 = 'down'; break;
+                    case 'ArrowLeft': case 'a': case 'A':
+                        if (direction1 !== 'right') nextDirection1 = 'left'; break;
+                    case 'ArrowRight': case 'd': case 'D':
+                        if (direction1 !== 'left') nextDirection1 = 'right'; break;
+                }
+            }
+            if (isMultiplayer && ['i','j','k','l'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                switch (e.key) {
+                    case 'i': case 'I': if (direction2 !== 'down') nextDirection2 = 'up'; break;
+                    case 'k': case 'K': if (direction2 !== 'up') nextDirection2 = 'down'; break;
+                    case 'j': case 'J': if (direction2 !== 'right') nextDirection2 = 'left'; break;
+                    case 'l': case 'L': if (direction2 !== 'left') nextDirection2 = 'right'; break;
+                }
+            }
+            if (e.code === 'Space') {
+                pauseBtn.click();
+            }
+        }
+
+        document.addEventListener('keydown', handleKeydown);
+        draw();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎮 小游戏大厅</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    #intro-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+    }
+    #intro-screen h1 {
+      font-size: 2.5rem;
+      margin-bottom: 24px;
+      color: #6366f1;
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    #enter-btn {
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #enter-btn:hover {
+      transform: scale(1.05);
+    }
+    .main-container {
+      display: flex;
+      gap: 20px;
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    #game-list {
+      width: 220px;
+      background: #1e293b;
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .game-btn {
+      padding: 10px 12px;
+      background: #334155;
+      color: #cbd5e1;
+      border: none;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+    .game-btn:hover {
+      background: #475569;
+    }
+    .game-btn.active {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+    }
+    .game-display {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #game-title {
+      font-size: 1.8rem;
+      color: #6366f1;
+    }
+    #game-tag {
+      background: #334155;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+    #game-desc {
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    #start-btn {
+      align-self: flex-end;
+      padding: 8px 20px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #game-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 16px;
+      overflow: auto;
+    }
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      #game-list {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .game-btn {
+        width: 48%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro Screen -->
+  <div id="intro-screen">
+    <h1>🎮 小游戏大厅</h1>
+    <button id="enter-btn">进入游戏</button>
+  </div>
+
+  <!-- Main Game Hub -->
+  <div class="main-container" style="display: none;" id="main-hub">
+    <div id="game-list">
+      <button class="game-btn active" data-game="guess">数字猜猜猜</button>
+      <button class="game-btn" data-game="snake">经典贪吃蛇</button>
+      <button class="game-btn" data-game="camera">表情挑战</button>
+      <button class="game-btn" data-game="fruit">切水果</button>
+      <button class="game-btn" data-game="click">反应力点击</button>
+      <button class="game-btn" data-game="react-battle">左右手对战</button>
+      <button class="game-btn" data-game="rhythm">节奏下落块</button>
+      <button class="game-btn" data-game="type-rain">字母雨打字</button>
+      <button class="game-btn" data-game="wasd-dodge">WASD躲避</button>
+      <button class="game-btn" data-game="dual-maze">双手迷宫</button>
+      <button class="game-btn" data-game="seq-memory">按键记忆</button>
+    </div>
+
+    <div class="game-display">
+      <div id="game-header">
+        <div>
+          <div id="game-title">数字猜猜猜</div>
+          <div id="game-desc">电脑想好 1 - 20 之间的一个整数，你来猜。猜错会扣分，看看你能拿到多少分。</div>
+        </div>
+        <div id="game-tag">入门 · 鼠标 / 键盘</div>
+      </div>
+      <div id="game-area">
+        <div style="color:#94a3b8;">点击右上角的“开始游戏”按钮来进入本游戏。</div>
+      </div>
+      <button id="start-btn">开始游戏</button>
+    </div>
+  </div>
+
+  <!-- Load MediaPipe for Fruit Game -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+  <script>
+    // ========== CORE GAME HUB ==========
+    const gameArea = document.getElementById("game-area");
+    const gameTitle = document.getElementById("game-title");
+    const gameDesc = document.getElementById("game-desc");
+    const gameTag = document.getElementById("game-tag");
+    const gameList = document.getElementById("game-list");
+    const startBtn = document.getElementById("start-btn");
+    const introScreen = document.getElementById("intro-screen");
+    const enterBtn = document.getElementById("enter-btn");
+
+    let currentGame = null;
+    let snakeLoopId = null;
+    let videoStream = null;
+    let fruitAnimId = null;
+    let fruitHands = null;
+    let fruitCamera = null;
+
+    // 🔑 NEW: Track current key handler to avoid duplicates
+    let currentKeyHandler = null;
+
+    // ==================== Utility ====================
+    function clearGameArea() {
+      gameArea.innerHTML = "";
+      gameArea.style.alignItems = "center";
+      gameArea.style.justifyContent = "center";
+
+      // Remove key handler
+      if (currentKeyHandler) {
+        window.removeEventListener("keydown", currentKeyHandler);
+        currentKeyHandler = null;
+      }
+
+      // Clean up resources
+      if (snakeLoopId) {
+        clearInterval(snakeLoopId);
+        snakeLoopId = null;
+      }
+      if (videoStream) {
+        videoStream.getTracks().forEach((t) => t.stop());
+        videoStream = null;
+      }
+      if (fruitAnimId) {
+        cancelAnimationFrame(fruitAnimId);
+        fruitAnimId = null;
+      }
+      if (fruitCamera && fruitCamera.stop) {
+        fruitCamera.stop();
+        fruitCamera = null;
+      }
+      if (fruitHands && fruitHands.close) {
+        fruitHands.close();
+        fruitHands = null;
+      }
+    }
+
+    function setActiveButton(name) {
+      [...gameList.querySelectorAll(".game-btn")].forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.game === name);
+      });
+    }
+
+    // ==================== ALL GAMES ====================
+    // [PASTE YOUR FULL JS CODE HERE — but with key handler fix]
+
+    // ==================== 数字猜猜猜 ====================
+    function renderGuessGame() {
+      clearGameArea();
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "flex";
+      wrapper.style.flexDirection = "column";
+      wrapper.style.gap = "12px";
+      wrapper.style.width = "100%";
+      wrapper.style.maxWidth = "420px";
+      wrapper.innerHTML = `
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:#9ca3af;">
+          <div>当前分数：<span id="g-score">20</span></div>
+          <div>最高分：<span id="g-best">0</span></div>
+        </div>
+        <div style="display:flex; justify-content:center; gap:12px;">
+          <div style="width:52px;height:52px;border-radius:12px;background:#020617;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;font-weight:600;">
+            <span id="g-secret">?</span>
+          </div>
+          <div style="width:52px;height:52px;border-radius:12px;background:#020617;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;font-weight:600;">
+            <span id="g-last">-</span>
+          </div>
+        </div>
+        <div id="g-status" style="min-height:20px;text-align:center;font-size:13px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="g-input" type="number" min="1" max="20" placeholder="输入 1 - 20 之间的一个数字"
+            style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid #374151;background:#020617;color:#e5e7eb;font-size:13px;outline:none;" />
+          <button id="g-btn" style="border:none;border-radius:10px;padding:8px 12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;font-size:13px;font-weight:600;cursor:pointer;">猜一下</button>
+        </div>
+        <button id="g-again" style="margin-top:4px;border:none;border-radius:10px;padding:8px 12px;background:#111827;color:#e5e7eb;font-size:13px;cursor:pointer;width:100%;">重新开始</button>
+      `;
+      gameArea.appendChild(wrapper);
+
+      let secret = Math.trunc(Math.random() * 20) + 1;
+      let score = 20;
+      let best = localStorage.getItem("guessBest") || 0;
+      const scoreEl = wrapper.querySelector("#g-score");
+      const bestEl = wrapper.querySelector("#g-best");
+      const statusEl = wrapper.querySelector("#g-status");
+      const secretEl = wrapper.querySelector("#g-secret");
+      const lastEl = wrapper.querySelector("#g-last");
+      const inputEl = wrapper.querySelector("#g-input");
+      const btnEl = wrapper.querySelector("#g-btn");
+      const againEl = wrapper.querySelector("#g-again");
+
+      bestEl.textContent = best;
+
+      function setStatus(msg, color = "#e5e7eb") {
+        statusEl.textContent = msg;
+        statusEl.style.color = color;
+      }
+
+      function reset() {
+        secret = Math.trunc(Math.random() * 20) + 1;
+        score = 20;
+        scoreEl.textContent = score;
+        secretEl.textContent = "?";
+        lastEl.textContent = "-";
+        inputEl.value = "";
+        setStatus("开始猜数字吧～");
+        inputEl.focus();
+      }
+
+      function handleGuess() {
+        const value = Number(inputEl.value);
+        if (!value) {
+          setStatus("先输入一个数字哦。", "#facc15");
+          return;
+        }
+        if (value < 1 || value > 20) {
+          setStatus("只能猜 1 - 20 之间的整数。", "#f97316");
+          return;
+        }
+        lastEl.textContent = value;
+        if (value === secret) {
+          secretEl.textContent = secret;
+          setStatus("🎉 猜对啦！", "#22c55e");
+          if (score > best) {
+            best = score;
+            localStorage.setItem("guessBest", best);
+            bestEl.textContent = best;
+          }
+        } else {
+          if (score > 1) {
+            score--;
+            scoreEl.textContent = score;
+            setStatus(value > secret ? "有点大了，试试小一点。" : "有点小了，试试大一点。", "#f97316");
+          } else {
+            score = 0;
+            scoreEl.textContent = score;
+            secretEl.textContent = secret;
+            setStatus("💥 次数用完啦，下次再来！", "#ef4444");
+          }
+        }
+        inputEl.focus();
+      }
+
+      btnEl.addEventListener("click", handleGuess);
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleGuess();
+      });
+      againEl.addEventListener("click", reset);
+      reset();
+    }
+
+    // ==================== 贪吃蛇 ====================
+    function renderSnakeGame() {
+      clearGameArea();
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      container.style.alignItems = "center";
+      container.style.gap = "8px";
+      container.style.width = "100%";
+
+      const topBar = document.createElement("div");
+      topBar.style.display = "flex";
+      topBar.style.justifyContent = "space-between";
+      topBar.style.width = "100%";
+      topBar.style.maxWidth = "420px";
+      topBar.style.fontSize = "13px";
+      topBar.style.color = "#9ca3af";
+      topBar.innerHTML = `
+        <div>分数：<span id="s-score">0</span></div>
+        <div>操作：方向键 ↑ ↓ ← →</div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const msg = document.createElement("div");
+      msg.style.fontSize = "13px";
+      msg.style.color = "#9ca3af";
+      msg.textContent = "按任意方向键开始游戏。";
+
+      container.appendChild(topBar);
+      container.appendChild(canvas);
+      container.appendChild(msg);
+      gameArea.appendChild(container);
+
+      const ctx = canvas.getContext("2d");
+      const tileSize = 20;
+      const tileCount = canvas.width / tileSize;
+
+      let snake = [
+        { x: 8, y: 10 },
+        { x: 7, y: 10 },
+        { x: 6, y: 10 },
+      ];
+      let dir = { x: 1, y: 0 };
+      let food = { x: 12, y: 10 };
+      let score = 0;
+      let running = false;
+
+      const scoreEl = topBar.querySelector("#s-score");
+
+      function randomFood() {
+        food = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount),
+        };
+      }
+
+      function draw() {
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Food
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize - 2, tileSize - 2);
+        // Snake
+        snake.forEach((part, index) => {
+          ctx.fillStyle = index === 0 ? "#6366f1" : "#4b5563";
+          ctx.fillRect(part.x * tileSize, part.y * tileSize, tileSize - 2, tileSize - 2);
+        });
+      }
+
+      function step() {
+        if (!running) return;
+        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+        if (head.x < 0 || head.y < 0 || head.x >= tileCount || head.y >= tileCount) {
+          gameOver();
+          return;
+        }
+        if (snake.some((p, i) => i > 0 && p.x === head.x && p.y === head.y)) {
+          gameOver();
+          return;
+        }
+
+        snake.unshift(head);
+
+        if (head.x === food.x && head.y === food.y) {
+          score += 1;
+          scoreEl.textContent = score;
+          randomFood();
+        } else {
+          snake.pop();
+        }
+        draw();
+      }
+
+      function gameOver() {
+        running = false;
+        msg.textContent = "游戏结束，按空格键重新开始。";
+      }
+
+      function reset() {
+        snake = [
+          { x: 8, y: 10 },
+          { x: 7, y: 10 },
+          { x: 6, y: 10 },
+        ];
+        dir = { x: 1, y: 0 };
+        score = 0;
+        scoreEl.textContent = score;
+        randomFood();
+        draw();
+        msg.textContent = "按任意方向键开始游戏。";
+      }
+
+      function handleKey(e) {
+        if (currentGame !== "snake") return;
+
+        if (!running && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+          running = true;
+          msg.textContent = "加油，别撞到墙和自己！";
+        }
+
+        switch (e.key) {
+          case "ArrowUp":
+            if (dir.y !== 1) dir = { x: 0, y: -1 };
+            break;
+          case "ArrowDown":
+            if (dir.y !== -1) dir = { x: 0, y: 1 };
+            break;
+          case "ArrowLeft":
+            if (dir.x !== 1) dir = { x: -1, y: 0 };
+            break;
+          case "ArrowRight":
+            if (dir.x !== -1) dir = { x: 1, y: 0 };
+            break;
+          case " ":
+            if (!running) reset();
+            break;
+        }
+      }
+
+      // ✅ Use global key handler system
+      currentKeyHandler = handleKey;
+      window.addEventListener("keydown", currentKeyHandler);
+
+      snakeLoopId = setInterval(step, 130);
+      reset();
+
+      // Focus canvas container for immediate key response
+      container.tabIndex = -1;
+      container.focus();
+    }
+
+    // ==================== 摄像头表情挑战 ====================
+    function renderCameraGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "10px";
+      box.style.width = "100%";
+
+      const top = document.createElement("div");
+      top.style.display = "flex";
+      top.style.justifyContent = "space-between";
+      top.style.width = "100%";
+      top.style.maxWidth = "460px";
+      top.style.fontSize = "13px";
+      top.style.color = "#9ca3af";
+      top.innerHTML = `<div>步骤：1. 先点击“打开摄像头”  2. 点击“开始倒计时”  3. 时间到时做个表情并截图</div>`;
+
+      const video = document.createElement("video");
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style.width = "100%";
+      video.style.maxWidth = "460px";
+      video.style.borderRadius = "12px";
+      video.style.border = "1px solid #1f2937";
+      video.style.background = "#020617";
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 460;
+      canvas.height = 260;
+      canvas.style.display = "none";
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+
+      const btnRow = document.createElement("div");
+      btnRow.style.display = "flex";
+      btnRow.style.gap = "8px";
+      btnRow.style.marginTop = "4px";
+
+      const openBtn = document.createElement("button");
+      openBtn.textContent = "打开摄像头";
+      openBtn.style.cssText = "border:none;border-radius:10px;padding:8px 12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;font-size:13px;cursor:pointer;";
+
+      const startBtn = document.createElement("button");
+      startBtn.textContent = "开始倒计时";
+      startBtn.style.cssText = "border:none;border-radius:10px;padding:8px 12px;background:#111827;color:#e5e7eb;font-size:13px;cursor:pointer;";
+
+      const shotBtn = document.createElement("button");
+      shotBtn.textContent = "截图";
+      shotBtn.style.cssText = "border:none;border-radius:10px;padding:8px 12px;background:#111827;color:#e5e7eb;font-size:13px;cursor:pointer;";
+
+      btnRow.appendChild(openBtn);
+      btnRow.appendChild(startBtn);
+      btnRow.appendChild(shotBtn);
+
+      const status = document.createElement("div");
+      status.style.fontSize = "14px";
+      status.style.color = "#22c55e";
+      status.textContent = "还没有打开摄像头。";
+
+      box.appendChild(top);
+      box.appendChild(video);
+      box.appendChild(canvas);
+      box.appendChild(btnRow);
+      box.appendChild(status);
+      gameArea.appendChild(box);
+
+      let countdown = null;
+      let count = 3;
+
+      function setStatus(msg, color = "#e5e7eb") {
+        status.textContent = msg;
+        status.style.color = color;
+      }
+
+      openBtn.addEventListener("click", async () => {
+        try {
+          videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          video.srcObject = videoStream;
+          setStatus("摄像头已打开，调整一下姿势吧。", "#22c55e");
+        } catch (err) {
+          console.error(err);
+          setStatus("无法打开摄像头，请检查权限或设备。", "#ef4444");
+        }
+      });
+
+      startBtn.addEventListener("click", () => {
+        if (!videoStream) {
+          setStatus("请先点击“打开摄像头”。", "#f97316");
+          return;
+        }
+        if (countdown) clearInterval(countdown);
+        count = 3;
+        setStatus(`倒计时：${count} 秒，准备好做表情！`, "#facc15");
+        countdown = setInterval(() => {
+          count -= 1;
+          if (count > 0) {
+            setStatus(`倒计时：${count} 秒！`, "#facc15");
+          } else {
+            clearInterval(countdown);
+            countdown = null;
+            setStatus("现在！做一个最夸张的表情，然后点击“截图”！", "#22c55e");
+          }
+        }, 1000);
+      });
+
+      shotBtn.addEventListener("click", () => {
+        if (!videoStream) {
+          setStatus("请先打开摄像头。", "#f97316");
+          return;
+        }
+        const ctx = canvas.getContext("2d");
+        const width = video.videoWidth || 460;
+        const height = video.videoHeight || 260;
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.display = "block";
+        ctx.drawImage(video, 0, 0, width, height);
+        setStatus("截图完成，可以右键图片 -> 另存为，保存这张表情照。", "#22c55e");
+      });
+    }
+
+    // ==================== 切水果 ====================
+    function renderFruitGame() {
+      clearGameArea();
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      container.style.alignItems = "center";
+      container.style.gap = "8px";
+      container.style.width = "100%";
+
+      const top = document.createElement("div");
+      top.style.display = "flex";
+      top.style.justifyContent = "space-between";
+      top.style.width = "100%";
+      top.style.maxWidth = "460px";
+      top.style.fontSize = "13px";
+      top.style.color = "#9ca3af";
+      top.innerHTML = `
+        <div>提示：对着摄像头伸出手，用手指在画面里快速「划过」水果，就能把它切碎。</div>
+        <div>分数：<span id="f-score">0</span></div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 460;
+      canvas.height = 300;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const video = document.createElement("video");
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style.display = "none";
+
+      const status = document.createElement("div");
+      status.style.fontSize = "13px";
+      status.style.color = "#22c55e";
+      status.textContent = "正在尝试打开摄像头...";
+
+      container.appendChild(top);
+      container.appendChild(canvas);
+      container.appendChild(video);
+      container.appendChild(status);
+      gameArea.appendChild(container);
+
+      const scoreEl = top.querySelector("#f-score");
+      const ctx = canvas.getContext("2d");
+      let fruits = [];
+      let score = 0;
+      let lastHand = null;
+      let prevHand = null;
+
+      function spawnFruit() {
+        const radius = 18 + Math.random() * 10;
+        const x = radius + Math.random() * (canvas.width - radius * 2);
+        const y = canvas.height + radius + Math.random() * 40;
+        const vy = -3 - Math.random() * 2;
+        const colorList = ["#f97316", "#22c55e", "#e11d48", "#a855f7"];
+        const color = colorList[Math.floor(Math.random() * colorList.length)];
+        fruits.push({ x, y, vy, radius, color, sliced: false, life: 0 });
+      }
+
+      for (let i = 0; i < 4; i++) spawnFruit();
+
+      function updateAndDrawBackground(image) {
+        if (image) {
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.drawImage(image, -canvas.width, 0, canvas.width, canvas.height);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = "#020617";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      function updateFruits() {
+        fruits.forEach((f) => {
+          f.y += f.vy;
+          f.vy += 0.08;
+          if (f.sliced) f.life += 1;
+        });
+        fruits = fruits.filter((f) => f.y - f.radius < canvas.height + 40 && f.life < 20);
+        while (fruits.length < 4) spawnFruit();
+      }
+
+      function checkSlice() {
+        if (!lastHand || !prevHand) return;
+        fruits.forEach((f) => {
+          if (f.sliced) return;
+          const dx = lastHand.x - f.x;
+          const dy = lastHand.y - f.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < f.radius + 10) {
+            f.sliced = true;
+            score += 1;
+            scoreEl.textContent = score;
+          }
+        });
+      }
+
+      function drawFruits() {
+        fruits.forEach((f) => {
+          if (!f.sliced) {
+            ctx.fillStyle = f.color;
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = f.color;
+            ctx.beginPath();
+            ctx.arc(f.x - 4, f.y, f.radius * 0.6, Math.PI * 0.2, Math.PI * 1.2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(f.x + 4, f.y, f.radius * 0.6, -Math.PI * 0.2, Math.PI * 0.8);
+            ctx.fill();
+          }
+        });
+      }
+
+      function drawBladeTrail() {
+        if (!lastHand || !prevHand) return;
+        ctx.strokeStyle = "rgba(248, 250, 252, 0.9)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(prevHand.x, prevHand.y);
+        ctx.lineTo(lastHand.x, lastHand.y);
+        ctx.stroke();
+      }
+
+      function gameLoop(image) {
+        updateAndDrawBackground(image);
+        updateFruits();
+        checkSlice();
+        drawFruits();
+        drawBladeTrail();
+        fruitAnimId = requestAnimationFrame(() => gameLoop(image));
+      }
+
+      // Check MediaPipe loaded
+      if (typeof Hands === 'undefined' || typeof Camera === 'undefined') {
+        status.style.color = "#ef4444";
+        status.textContent = "加载失败：请确保网络连接正常。";
+        return;
+      }
+
+      fruitHands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+      });
+      fruitHands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5,
+      });
+
+      fruitHands.onResults((results) => {
+        if (results.multiHandLandmarks?.[0]) {
+          const tip = results.multiHandLandmarks[0][8];
+          const x = canvas.width - tip.x * canvas.width;
+          const y = tip.y * canvas.height;
+          prevHand = lastHand;
+          lastHand = { x, y };
+          status.style.color = "#22c55e";
+          status.textContent = "已检测到手部，在画面中挥动手指来切水果！";
+        } else {
+          prevHand = lastHand;
+          lastHand = null;
+          status.style.color = "#facc15";
+          status.textContent = "没有检测到手部，请把手伸到摄像头前。";
+        }
+        cancelAnimationFrame(fruitAnimId);
+        gameLoop(results.image);
+      });
+
+      fruitCamera = new Camera(video, {
+        onFrame: async () => {
+          await fruitHands.send({ image: video });
+        },
+        width: 640,
+        height: 480,
+      });
+
+      fruitCamera.start().catch((err) => {
+        console.error(err);
+        status.style.color = "#ef4444";
+        status.textContent = "无法打开摄像头，请检查权限或设备。";
+      });
+    }
+
+    // ==================== 左右手反应大战 ====================
+    function renderReactBattleGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.gap = "12px";
+      box.style.width = "100%";
+      box.style.maxWidth = "460px";
+
+      const scores = document.createElement("div");
+      scores.style.display = "flex";
+      scores.style.justifyContent = "space-between";
+      scores.style.fontSize = "14px";
+      scores.style.color = "#e5e7eb";
+      scores.innerHTML = `
+        <div>左侧玩家 (A S D)：<span id="rb-left">0</span></div>
+        <div>右侧玩家 (J K L)：<span id="rb-right">0</span></div>
+      `;
+
+      const center = document.createElement("div");
+      center.style.cssText = "border-radius:12px;border:1px solid #1f2937;background:#020617;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;";
+
+      const prompt = document.createElement("div");
+      prompt.style.cssText = "font-size:18px;font-weight:600;";
+      prompt.textContent = "按空格开始一轮对战";
+
+      const detail = document.createElement("div");
+      detail.style.cssText = "font-size:13px;color:#9ca3af;";
+      detail.textContent = "提示会显示“左手按 A”或“右手按 K”，谁先按对对应键谁就得 1 分。";
+
+      center.appendChild(prompt);
+      center.appendChild(detail);
+      box.appendChild(scores);
+      box.appendChild(center);
+      gameArea.appendChild(box);
+
+      const leftScoreEl = scores.querySelector("#rb-left");
+      const rightScoreEl = scores.querySelector("#rb-right");
+      let leftScore = 0;
+      let rightScore = 0;
+      let roundActive = false;
+      let expectedSide = null;
+      let expectedKey = null;
+      const leftKeys = ["a", "s", "d"];
+      const rightKeys = ["j", "k", "l"];
+
+      function startRound() {
+        roundActive = false;
+        prompt.textContent = "准备中... 等待指令出现";
+        detail.textContent = "指令随机在 1 秒后出现，先按对的人得分。";
+        const wait = 500 + Math.random() * 1200;
+        setTimeout(() => {
+          if (currentGame !== "react-battle") return;
+          if (Math.random() < 0.5) {
+            expectedSide = "left";
+            expectedKey = leftKeys[Math.floor(Math.random() * leftKeys.length)];
+            prompt.textContent = `左侧玩家按键：${expectedKey.toUpperCase()}`;
+          } else {
+            expectedSide = "right";
+            expectedKey = rightKeys[Math.floor(Math.random() * rightKeys.length)];
+            prompt.textContent = `右侧玩家按键：${expectedKey.toUpperCase()}`;
+          }
+          detail.textContent = "谁先按对，谁就得分！";
+          roundActive = true;
+        }, wait);
+      }
+
+      function handleKey(e) {
+        if (currentGame !== "react-battle") return;
+        const key = e.key.toLowerCase();
+        if (e.key === " " && !roundActive) {
+          startRound();
+          return;
+        }
+        if (!roundActive || !expectedKey) return;
+        if (key === expectedKey) {
+          roundActive = false;
+          if (expectedSide === "left") {
+            leftScore += 1;
+            leftScoreEl.textContent = leftScore;
+            prompt.textContent = `左侧玩家赢下这一回合！（按空格继续）`;
+          } else {
+            rightScore += 1;
+            rightScoreEl.textContent = rightScore;
+            prompt.textContent = `右侧玩家赢下这一回合！（按空格继续）`;
+          }
+          detail.textContent = "再次按空格，进入下一轮。";
+        }
+      }
+
+      currentKeyHandler = handleKey;
+      window.addEventListener("keydown", currentKeyHandler);
+    }
+
+    // ==================== 反应力点击 ====================
+    function renderClickGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.cssText = "position:relative;width:100%;max-width:420px;height:260px;border-radius:12px;border:1px solid #1f2937;background:#020617;overflow:hidden;";
+
+      const info = document.createElement("div");
+      info.style.cssText = "position:absolute;left:12px;top:10px;font-size:13px;color:#9ca3af;";
+      info.textContent = "点击“开始”后，等待方块出现，尽快点击它。";
+
+      const result = document.createElement("div");
+      result.style.cssText = "position:absolute;left:12px;bottom:10px;font-size:13px;color:#e5e7eb;";
+      result.textContent = "还没有成绩。";
+
+      const start = document.createElement("button");
+      start.textContent = "开始";
+      start.style.cssText = "position:absolute;right:12px;top:10px;border:none;border-radius:999px;padding:6px 14px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;font-size:12px;cursor:pointer;";
+
+      const target = document.createElement("div");
+      target.style.cssText = "position:absolute;width:40px;height:40px;border-radius:8px;background:#22c55e;display:none;cursor:pointer;";
+
+      box.appendChild(info);
+      box.appendChild(result);
+      box.appendChild(start);
+      box.appendChild(target);
+      gameArea.appendChild(box);
+
+      let timerId = null;
+      let startTime = null;
+      let best = localStorage.getItem("clickBest") || null;
+
+      function resetTarget() {
+        const rectWidth = box.clientWidth - 50;
+        const rectHeight = box.clientHeight - 50;
+        const x = Math.random() * rectWidth + 10;
+        const y = Math.random() * rectHeight + 20;
+        target.style.left = `${x}px`;
+        target.style.top = `${y}px`;
+      }
+
+      function startRound() {
+        target.style.display = "none";
+        result.textContent = "等待方块出现...";
+        const wait = 700 + Math.random() * 2000;
+        if (timerId) clearTimeout(timerId);
+        timerId = setTimeout(() => {
+          resetTarget();
+          target.style.display = "block";
+          startTime = performance.now();
+          result.textContent = "快点点击绿色方块！";
+        }, wait);
+      }
+
+      start.addEventListener("click", startRound);
+
+      target.addEventListener("click", () => {
+        const t = performance.now() - startTime;
+        target.style.display = "none";
+        if (best === null || t < best) {
+          best = t;
+          localStorage.setItem("clickBest", best);
+          result.textContent = `本次：${t.toFixed(0)} ms · 最高纪录：${best.toFixed(0)} ms`;
+        } else {
+          result.textContent = `本次：${t.toFixed(0)} ms · 最高纪录：${best.toFixed(0)} ms`;
+        }
+      });
+    }
+
+    // ==================== 节奏下落块 ====================
+    function renderRhythmGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "8px";
+      box.style.width = "100%";
+
+      const info = document.createElement("div");
+      info.style.display = "flex";
+      info.style.justifyContent = "space-between";
+      info.style.width = "100%";
+      info.style.maxWidth = "420px";
+      info.style.fontSize = "13px";
+      info.style.color = "#9ca3af";
+      info.innerHTML = `
+        <div>按键：F / G / H / J</div>
+        <div>分数：<span id="ry-score">0</span> · 连击：<span id="ry-combo">0</span></div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 260;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const tip = document.createElement("div");
+      tip.style.fontSize = "13px";
+      tip.style.color = "#9ca3af";
+      tip.textContent = "节奏简化版：方块到达底部白线附近时按对应键得分。";
+
+      box.appendChild(info);
+      box.appendChild(canvas);
+      box.appendChild(tip);
+      gameArea.appendChild(box);
+
+      const scoreEl = info.querySelector("#ry-score");
+      const comboEl = info.querySelector("#ry-combo");
+      const ctx = canvas.getContext("2d");
+      const lanes = ["f", "g", "h", "j"];
+      const laneWidth = canvas.width / 4;
+      const hitY = canvas.height - 40;
+      let notes = [];
+      let score = 0;
+      let combo = 0;
+
+      function spawnNote() {
+        const lane = Math.floor(Math.random() * 4);
+        notes.push({ lane, y: -20, speed: 2.2, hit: false });
+      }
+
+      for (let i = 0; i < 6; i++) {
+        notes.push({ lane: Math.floor(Math.random() * 4), y: -i * 60, speed: 2.2, hit: false });
+      }
+
+      function draw() {
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let i = 1; i < 4; i++) {
+          ctx.strokeStyle = "#111827";
+          ctx.beginPath();
+          ctx.moveTo(i * laneWidth, 0);
+          ctx.lineTo(i * laneWidth, canvas.height);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.beginPath();
+        ctx.moveTo(0, hitY);
+        ctx.lineTo(canvas.width, hitY);
+        ctx.stroke();
+        notes.forEach((n) => {
+          ctx.fillStyle = n.hit ? "#22c55e" : "#6366f1";
+          const x = n.lane * laneWidth + 10;
+          ctx.fillRect(x, n.y, laneWidth - 20, 18);
+        });
+      }
+
+      function update() {
+        notes.forEach((n) => n.y += n.speed);
+        const before = notes.length;
+        notes = notes.filter((n) => n.y < canvas.height + 40);
+        const removed = before - notes.length;
+        if (removed > 0) for (let i = 0; i < removed; i++) spawnNote();
+      }
+
+      function loop() {
+        if (currentGame !== "rhythm") return;
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      function handleKey(e) {
+        if (currentGame !== "rhythm") return;
+        const key = e.key.toLowerCase();
+        const laneIndex = lanes.indexOf(key);
+        if (laneIndex === -1) return;
+        let target = null;
+        let bestDist = 999;
+        notes.forEach((n) => {
+          if (n.lane !== laneIndex || n.hit) return;
+          const d = Math.abs(n.y - hitY);
+          if (d < bestDist) {
+            bestDist = d;
+            target = n;
+          }
+        });
+        if (target && bestDist < 28) {
+          target.hit = true;
+          score += 100;
+          combo += 1;
+          scoreEl.textContent = score;
+          comboEl.textContent = combo;
+        } else {
+          combo = 0;
+          comboEl.textContent = combo;
+        }
+      }
+
+      currentKeyHandler = handleKey;
+      window.addEventListener("keydown", currentKeyHandler);
+      loop();
+    }
+
+    // ==================== 字母雨打字 ====================
+    function renderTypeRainGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "8px";
+      box.style.width = "100%";
+
+      const info = document.createElement("div");
+      info.style.display = "flex";
+      info.style.justifyContent = "space-between";
+      info.style.width = "100%";
+      info.style.maxWidth = "420px";
+      info.style.fontSize = "13px";
+      info.style.color = "#9ca3af";
+      info.innerHTML = `
+        <div>直接在键盘上输入屏幕上的字母</div>
+        <div>命中：<span id="tr-hit">0</span> · Miss：<span id="tr-miss">0</span></div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 260;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const tip = document.createElement("div");
+      tip.style.fontSize = "13px";
+      tip.style.color = "#9ca3af";
+      tip.textContent = "屏幕上会不断掉落字母，掉到底部会算 Miss，按对应键可以消除。";
+
+      box.appendChild(info);
+      box.appendChild(canvas);
+      box.appendChild(tip);
+      gameArea.appendChild(box);
+
+      const hitEl = info.querySelector("#tr-hit");
+      const missEl = info.querySelector("#tr-miss");
+      const ctx = canvas.getContext("2d");
+      let letters = [];
+      let hit = 0;
+      let miss = 0;
+
+      function spawnLetter() {
+        const ch = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+        const x = 20 + Math.random() * (canvas.width - 40);
+        letters.push({ ch, x, y: -10, speed: 1.1 + Math.random() * 1.2 });
+      }
+
+      for (let i = 0; i < 6; i++) spawnLetter();
+
+      function update() {
+        letters.forEach((l) => l.y += l.speed);
+        const remained = [];
+        letters.forEach((l) => {
+          if (l.y < canvas.height + 20) {
+            remained.push(l);
+          } else {
+            miss += 1;
+            missEl.textContent = miss;
+          }
+        });
+        letters = remained;
+        while (letters.length < 8) spawnLetter();
+      }
+
+      function draw() {
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        letters.forEach((l) => {
+          ctx.fillStyle = "#e5e7eb";
+          ctx.font = "18px system-ui";
+          ctx.fillText(l.ch.toUpperCase(), l.x, l.y);
+        });
+      }
+
+      function loop() {
+        if (currentGame !== "type-rain") return;
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      function handleKey(e) {
+        if (currentGame !== "type-rain") return;
+        const key = e.key.toLowerCase();
+        if (key.length !== 1 || key < "a" || key > "z") return;
+        let idx = -1;
+        let bestY = -1;
+        letters.forEach((l, i) => {
+          if (l.ch === key && l.y > bestY) {
+            bestY = l.y;
+            idx = i;
+          }
+        });
+        if (idx !== -1) {
+          letters.splice(idx, 1);
+          hit += 1;
+          hitEl.textContent = hit;
+        }
+      }
+
+      currentKeyHandler = handleKey;
+      window.addEventListener("keydown", currentKeyHandler);
+      loop();
+    }
+
+    // ==================== WASD 躲避障碍 ====================
+    function renderWasdDodgeGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "8px";
+      box.style.width = "100%";
+
+      const info = document.createElement("div");
+      info.style.display = "flex";
+      info.style.justifyContent = "space-between";
+      info.style.width = "100%";
+      info.style.maxWidth = "420px";
+      info.style.fontSize = "13px";
+      info.style.color = "#9ca3af";
+      info.innerHTML = `
+        <div>用 WASD 控制蓝色小方块移动</div>
+        <div>生存时间：<span id="wd-time">0</span> 秒</div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 260;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const tip = document.createElement("div");
+      tip.style.fontSize = "13px";
+      tip.style.color = "#9ca3af";
+      tip.textContent = "红色方块会从上方掉下来，被撞到就结束，看看你能坚持多久。";
+
+      box.appendChild(info);
+      box.appendChild(canvas);
+      box.appendChild(tip);
+      gameArea.appendChild(box);
+
+      const timeEl = info.querySelector("#wd-time");
+      const ctx = canvas.getContext("2d");
+      const player = { x: canvas.width / 2 - 12, y: canvas.height - 40, size: 24, speed: 3 };
+      let keys = {};
+      let obstacles = [];
+      let startTime = performance.now();
+      let alive = true;
+
+      function spawnObstacle() {
+        const width = 20 + Math.random() * 50;
+        const x = Math.random() * (canvas.width - width);
+        obstacles.push({ x, y: -20, w: width, h: 16 + Math.random() * 10, speed: 1.6 + Math.random() * 1.5 });
+      }
+
+      for (let i = 0; i < 5; i++) spawnObstacle();
+
+      function update() {
+        if (!alive) return;
+        if (keys["w"]) player.y -= player.speed;
+        if (keys["s"]) player.y += player.speed;
+        if (keys["a"]) player.x -= player.speed;
+        if (keys["d"]) player.x += player.speed;
+        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+        obstacles.forEach((o) => o.y += o.speed);
+        obstacles = obstacles.filter((o) => o.y < canvas.height + 30);
+        while (obstacles.length < 7) spawnObstacle();
+
+        obstacles.forEach((o) => {
+          if (
+            player.x < o.x + o.w &&
+            player.x + player.size > o.x &&
+            player.y < o.y + o.h &&
+            player.y + player.size > o.y
+          ) {
+            alive = false;
+          }
+        });
+
+        const t = (performance.now() - startTime) / 1000;
+        timeEl.textContent = t.toFixed(1);
+      }
+
+      function draw() {
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#6366f1";
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+        ctx.fillStyle = "#ef4444";
+        obstacles.forEach((o) => ctx.fillRect(o.x, o.y, o.w, o.h));
+        if (!alive) {
+          ctx.fillStyle = "rgba(15,23,42,0.8)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "#f97316";
+          ctx.font = "18px system-ui";
+          ctx.fillText("被撞到了，按 R 重新开始", 70, canvas.height / 2);
+        }
+      }
+
+      function loop() {
+        if (currentGame !== "wasd-dodge") return;
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (currentGame !== "wasd-dodge") return;
+        const k = e.key.toLowerCase();
+        keys[k] = true;
+        if (!alive && k === "r") {
+          player.x = canvas.width / 2 - 12;
+          player.y = canvas.height - 40;
+          obstacles = [];
+          for (let i = 0; i < 5; i++) spawnObstacle();
+          startTime = performance.now();
+          alive = true;
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (currentGame !== "wasd-dodge") return;
+        const k = e.key.toLowerCase();
+        keys[k] = false;
+      });
+
+      loop();
+    }
+
+    // ==================== 双手迷宫 ====================
+    function renderDualMazeGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "8px";
+      box.style.width = "100%";
+
+      const info = document.createElement("div");
+      info.style.display = "flex";
+      info.style.flexDirection = "column";
+      info.style.gap = "4px";
+      info.style.width = "100%";
+      info.style.maxWidth = "420px";
+      info.style.fontSize = "13px";
+      info.style.color = "#9ca3af";
+      info.innerHTML = `
+        <div>左侧方块：W A S D 移动</div>
+        <div>右侧方块：方向键 ↑ ↓ ← → 移动</div>
+      `;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 420;
+      canvas.height = 260;
+      canvas.style.borderRadius = "12px";
+      canvas.style.border = "1px solid #1f2937";
+      canvas.style.background = "#020617";
+
+      const status = document.createElement("div");
+      status.style.fontSize = "13px";
+      status.style.color = "#e5e7eb";
+      status.textContent = "把两个小方块都移动到各自的绿色终点格子里。";
+
+      box.appendChild(info);
+      box.appendChild(canvas);
+      box.appendChild(status);
+      gameArea.appendChild(box);
+
+      const ctx = canvas.getContext("2d");
+      const cols = 10;
+      const rows = 6;
+      const cellSize = 40;
+      const offsetX = (canvas.width - cols * cellSize) / 2;
+      const offsetY = (canvas.height - rows * cellSize) / 2;
+
+      const walls = new Set();
+      function addWall(c, r) { walls.add(`${c},${r}`); }
+      [1,2,3,4,5,6,7].forEach(c => addWall(c, 1));
+      [2,3,4,5,6,7,8].forEach(c => addWall(c, 4));
+      [2,3,4].forEach(r => addWall(5, r));
+      [1,2,3].forEach(r => addWall(8, r));
+
+      const left = { c: 0, r: 0 };
+      const right = { c: cols - 1, r: rows - 1 };
+      const leftGoal = { c: 3, r: 5 };
+      const rightGoal = { c: 6, r: 0 };
+      let finished = false;
+
+      function canMove(c, r) {
+        return c >= 0 && c < cols && r >= 0 && r < rows && !walls.has(`${c},${r}`);
+      }
+
+      function drawGrid() {
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const x = offsetX + c * cellSize;
+            const y = offsetY + r * cellSize;
+            ctx.strokeStyle = "#111827";
+            ctx.strokeRect(x, y, cellSize, cellSize);
+            if (walls.has(`${c},${r}`)) {
+              ctx.fillStyle = "#111827";
+              ctx.fillRect(x, y, cellSize, cellSize);
+            }
+          }
+        }
+        ctx.fillStyle = "#16a34a";
+        ctx.fillRect(offsetX + leftGoal.c * cellSize + 4, offsetY + leftGoal.r * cellSize + 4, cellSize - 8, cellSize - 8);
+        ctx.fillRect(offsetX + rightGoal.c * cellSize + 4, offsetY + rightGoal.r * cellSize + 4, cellSize - 8, cellSize - 8);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fillRect(offsetX + left.c * cellSize + 8, offsetY + left.r * cellSize + 8, cellSize - 16, cellSize - 16);
+        ctx.fillStyle = "#f97316";
+        ctx.fillRect(offsetX + right.c * cellSize + 8, offsetY + right.r * cellSize + 8, cellSize - 16, cellSize - 16);
+      }
+
+      function checkFinish() {
+        if (left.c === leftGoal.c && left.r === leftGoal.r && right.c === rightGoal.c && right.r === rightGoal.r) {
+          finished = true;
+          status.textContent = "太棒了！你用双手把两个方块都走到终点了。";
+          status.style.color = "#22c55e";
+        }
+      }
+
+      function loop() {
+        if (currentGame !== "dual-maze") return;
+        drawGrid();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (currentGame !== "dual-maze" || finished) return;
+        let moved = false;
+        switch (e.key) {
+          case "w": case "W": if (canMove(left.c, left.r - 1)) { left.r--; moved = true; } break;
+          case "s": case "S": if (canMove(left.c, left.r + 1)) { left.r++; moved = true; } break;
+          case "a": case "A": if (canMove(left.c - 1, left.r)) { left.c--; moved = true; } break;
+          case "d": case "D": if (canMove(left.c + 1, left.r)) { left.c++; moved = true; } break;
+          case "ArrowUp": if (canMove(right.c, right.r - 1)) { right.r--; moved = true; } break;
+          case "ArrowDown": if (canMove(right.c, right.r + 1)) { right.r++; moved = true; } break;
+          case "ArrowLeft": if (canMove(right.c - 1, right.r)) { right.c--; moved = true; } break;
+          case "ArrowRight": if (canMove(right.c + 1, right.r)) { right.c++; moved = true; } break;
+        }
+        if (moved) checkFinish();
+      });
+
+      loop();
+    }
+
+    // ==================== 按键顺序记忆 ====================
+    function renderSeqMemoryGame() {
+      clearGameArea();
+      const box = document.createElement("div");
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.alignItems = "center";
+      box.style.gap = "10px";
+      box.style.width = "100%";
+      box.style.maxWidth = "460px";
+
+      const info = document.createElement("div");
+      info.style.display = "flex";
+      info.style.justifyContent = "space-between";
+      info.style.width = "100%";
+      info.style.fontSize = "13px";
+      info.style.color = "#9ca3af";
+      info.innerHTML = `
+        <div>使用键盘按顺序输入提示的按键</div>
+        <div>回合：<span id="sm-round">1</span></div>
+      `;
+
+      const panel = document.createElement("div");
+      panel.style.cssText = "border-radius:12px;border:1px solid #1f2937;background:#020617;padding:18px 16px;width:100%;display:flex;flex-direction:column;gap:10px;";
+
+      const seqView = document.createElement("div");
+      seqView.style.cssText = "font-size:20px;text-align:center;";
+      seqView.textContent = "按空格生成一串按键序列";
+
+      const tip = document.createElement("div");
+      tip.style.cssText = "font-size:13px;color:#9ca3af;";
+      tip.textContent = "提示会短暂显示一串键，比如 A ↑ D S，消失后你要用键盘按出同样顺序。";
+
+      const status = document.createElement("div");
+      status.style.cssText = "font-size:14px;color:#e5e7eb;";
+
+      panel.appendChild(seqView);
+      panel.appendChild(tip);
+      panel.appendChild(status);
+      box.appendChild(info);
+      box.appendChild(panel);
+      gameArea.appendChild(box);
+
+      const roundEl = info.querySelector("#sm-round");
+      const pool = ["A", "S", "D", "F", "J", "K", "L", "↑", "↓", "←", "→"];
+      let round = 1;
+      let seq = [];
+      let inputIndex = 0;
+      let showing = false;
+
+      function randomKeySymbol() {
+        return pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      function normalizeKey(eKey) {
+        switch (eKey) {
+          case "ArrowUp": return "↑";
+          case "ArrowDown": return "↓";
+          case "ArrowLeft": return "←";
+          case "ArrowRight": return "→";
+          default: return eKey.toUpperCase();
+        }
+      }
+
+      function generateSeq() {
+        seq = [];
+        for (let i = 0; i < round + 2; i++) {
+          seq.push(randomKeySymbol());
+        }
+      }
+
+      async function showSeq() {
+        showing = true;
+        status.textContent = "";
+        for (let i = 0; i < seq.length; i++) {
+          seqView.textContent = seq.slice(0, i + 1).join(" ");
+          await new Promise(res => setTimeout(res, 600));
+        }
+        await new Promise(res => setTimeout(res, 600));
+        seqView.textContent = "请开始输入...";
+        showing = false;
+        inputIndex = 0;
+      }
+
+      function startRound() {
+        generateSeq();
+        roundEl.textContent = round;
+        showSeq();
+      }
+
+      function handleKey(e) {
+        if (currentGame !== "seq-memory") return;
+        if (e.key === " " && !showing && seq.length === 0) {
+          startRound();
+          return;
+        }
+        if (showing || seq.length === 0) return;
+        const key = normalizeKey(e.key);
+        if (!pool.includes(key)) return;
+        if (key === seq[inputIndex]) {
+          inputIndex++;
+          status.style.color = "#22c55e";
+          status.textContent = `正确：${key}`;
+          if (inputIndex === seq.length) {
+            status.textContent = "这一轮全对！即将进入下一轮（序列会变长）。";
+            seq = [];
+            inputIndex = 0;
+            round++;
+            setTimeout(() => {
+              if (currentGame === "seq-memory") startRound();
+            }, 1000);
+          }
+        } else {
+          status.style.color = "#ef4444";
+          status.textContent = `错误：你按的是 ${key}，应该按 ${seq[inputIndex]}`;
+          seq = [];
+          inputIndex = 0;
+          setTimeout(() => {
+            if (currentGame === "seq-memory") {
+              seqView.textContent = "按空格重新开始这一轮";
+            }
+          }, 600);
+        }
+      }
+
+      currentKeyHandler = handleKey;
+      window.addEventListener("keydown", currentKeyHandler);
+    }
+
+    // ==================== Game Switching ====================
+    function applyGameIntro(name) {
+      const games = {
+        guess: ["数字猜猜猜", "电脑想好 1 - 20 之间的一个整数，你来猜。猜错会扣分，看看你能拿到多少分。", "入门 · 鼠标 / 键盘"],
+        snake: ["经典贪吃蛇", "使用键盘方向键控制小蛇移动，吃到更多食物让自己变长，别撞墙也别撞到自己。", "经典 · 键盘"],
+        camera: ["摄像头表情挑战", "打开摄像头，倒计时结束时摆一个最夸张的表情，然后点击截图，保存这张有趣的照片。", "互动 · 摄像头"],
+        fruit: ["摄像头切水果", "打开摄像头，用手在空中做划过的动作，切掉画面中飞来的水果，不需要用鼠标。", "体感 · 摄像头 / 手势"],
+        click: ["反应力点击", "在随机时间随机位置出现一个绿色方块，你需要尽可能快地点中它，测试你的反应速度。", "休闲 · 鼠标"],
+        reactBattle: ["左右手反应大战", "两名玩家分别使用左手 A S D 和右手 J K L，根据屏幕指令快速按对按键，抢分对战。", "对战 · 键盘 / 双人"],
+        rhythm: ["节奏下落块", "从上方下落 4 列方块，对应按键 F G H J，在方块到达判定线时按对，保持连击获得高分。", "节奏 · 键盘"],
+        typeRain: ["字母雨打字", "随机字母从上方掉落，你需要用键盘及时输入对应字母，将它们消除，练习打字速度和准确度。", "练习 · 键盘打字"],
+        wasdDodge: ["WASD 躲避障碍", "使用 WASD 控制一个小方块左右上下移动，避开从上方掉下来的障碍，活得越久分数越高。", "躲避 · 键盘"],
+        dualMaze: ["双手迷宫", "左手用 WASD 控制左边方块，右手用方向键控制右边方块，同时把两个方块都移动到各自的终点。", "协调 · 双手键盘"],
+        seqMemory: ["按键顺序记忆", "屏幕会闪现一串按键序列（例如 A ↑ D S），你需要记住并用键盘按同样顺序，回合越晚越难。", "记忆 · 键盘"]
+      };
+      const [title, desc, tag] = games[name] || games.guess;
+      gameTitle.textContent = title;
+      gameDesc.textContent = desc;
+      gameTag.textContent = tag;
+    }
+
+    function switchGame(name) {
+      currentGame = name;
+      setActiveButton(name);
+      applyGameIntro(name);
+      clearGameArea();
+      const tip = document.createElement("div");
+      tip.style.fontSize = "0.9rem";
+      tip.style.color = "#9ca3af";
+      tip.textContent = "点击右上角的“开始游戏”按钮来进入本游戏。";
+      gameArea.appendChild(tip);
+    }
+
+    gameList.addEventListener("click", (e) => {
+      const btn = e.target.closest(".game-btn");
+      if (btn) switchGame(btn.dataset.game);
+    });
+
+    startBtn.addEventListener("click", () => {
+      if (!currentGame) return;
+      const gameMap = {
+        guess: renderGuessGame,
+        snake: renderSnakeGame,
+        camera: renderCameraGame,
+        fruit: renderFruitGame,
+        click: renderClickGame,
+        "react-battle": renderReactBattleGame,
+        rhythm: renderRhythmGame,
+        "type-rain": renderTypeRainGame,
+        "wasd-dodge": renderWasdDodgeGame,
+        "dual-maze": renderDualMazeGame,
+        "seq-memory": renderSeqMemoryGame
+      };
+      const renderer = gameMap[currentGame];
+      if (renderer) renderer();
+    });
+
+    // Default
+    switchGame("guess");
+
+    // Intro screen
+    enterBtn.addEventListener("click", () => {
+      introScreen.style.opacity = "0";
+      setTimeout(() => {
+        introScreen.style.display = "none";
+        document.getElementById("main-hub").style.display = "flex";
+      }, 400);
+    });
+  </script>
+</body>
+</html>
