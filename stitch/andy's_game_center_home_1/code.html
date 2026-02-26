@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Andy's Game Center</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6366f1", // Adjusted to electric purple
+                        "background-light": "#f8fafc", // Clean off-white
+                        "background-dark": "#101122",
+                        "card-dark": "#1e293b",
+                        "neon-cyan": "#4ade80",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>.tech-glow-text {
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }html:not(.dark) .tech-glow-text {
+            text-shadow: none;
+            color: #4338ca;}
+        .tech-card-hover {
+            transition: all 0.3s ease;
+        }html.dark .tech-card-hover:hover {
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            transform: translateY(-4px);
+        }html:not(.dark) .tech-card-hover:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+            border-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-200 transition-colors duration-300">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#232448] px-4 py-3 lg:px-10 bg-white/90 dark:bg-[#111122]/90 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+<div class="flex items-center gap-4 lg:gap-8">
+<div class="flex items-center gap-2 lg:gap-4 text-slate-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors cursor-pointer">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[32px]">sports_esports</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg lg:text-xl font-bold leading-tight tracking-[-0.015em] hidden sm:block">Andy's Game Center</h2>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Home</a>
+<a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Leaderboard</a>
+<a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-3 lg:gap-6">
+<label class="hidden sm:flex flex-col min-w-40 !h-10 max-w-64 group">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full ring-1 ring-slate-200 dark:ring-[#232448] focus-within:ring-primary transition-all bg-slate-100 dark:bg-[#1e293b]">
+<div class="text-slate-400 dark:text-[#9293c9] flex border-none bg-transparent items-center justify-center pl-3 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-l-none text-slate-900 dark:text-white focus:outline-0 border-none bg-transparent h-full placeholder:text-slate-400 dark:placeholder:text-[#5a5c8a] px-3 text-sm font-normal leading-normal" placeholder="Search games..." value=""/>
+</div>
+</label>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1e293b] hover:text-primary dark:hover:text-neon-cyan transition-all dark:hover:shadow-[0_0_10px_rgba(74,222,128,0.4)]" title="Refresh Games">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1e293b] hover:text-primary transition-all" onclick="document.documentElement.classList.toggle('dark')" title="Toggle Light/Dark Mode">
+<span class="material-symbols-outlined dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block">light_mode</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-md dark:shadow-[0_0_10px_rgba(100,103,242,0.4)]">
+<span class="truncate">Login</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 justify-center py-5 px-4 md:px-8 lg:px-20">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+<div class="@container mb-10">
+<div class="flex min-h-[400px] flex-col gap-6 bg-cover bg-center bg-no-repeat rounded-xl items-center justify-center p-8 relative overflow-hidden group shadow-xl" data-alt="Abstract dark retro gaming synthwave landscape with grid lines and neon sun" style='background-image: linear-gradient(rgba(16, 17, 34, 0.7) 0%, rgba(16, 17, 34, 0.9) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBB9NtlgA1S-8h7M6_y6ravuDdyKWN5q9eaicL0DKar9Tys1NKREcn5wDrfmRNo4IWSbx9Mpk84UdmS8GKfVxqtWyYFmy73ZbT_yRm9J80RMwL8pBNIzPVw3tfHiXFflUWyu28aIo9BdrQcG6o307X_8jxxSYM5uw4-YwCpicVFklEtb9kDQdE5PD3CatHt525sWTf3hdFMadYwQu3rwmtVX4ArnvJgF1j1I-3LykcE3CkPpc5IewXPLkJemmhNJwF0mwv-7fvibwE");'>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90"></div>
+<div class="relative z-10 flex flex-col gap-4 text-center max-w-2xl animate-fade-in">
+<div class="inline-flex items-center justify-center p-3 bg-primary/20 rounded-full w-16 h-16 mx-auto mb-2 border border-primary/50 shadow-[0_0_15px_rgba(100,103,242,0.5)]">
+<span class="material-symbols-outlined text-4xl text-white">stadia_controller</span>
+</div>
+<h1 class="text-white text-4xl md:text-6xl font-black leading-tight tracking-[-0.033em] tech-glow-text !text-shadow-glow">
+                                    🎮 Andy's Game Center
+                                </h1>
+<h2 class="text-slate-300 text-lg md:text-xl font-normal leading-relaxed">
+                                    11 款小遊戲，一鍵即玩，無需下載！<br/>
+<span class="text-primary text-base opacity-80 font-mono mt-2 block">11 Mini-Games • Instant Play • No Download</span>
+</h2>
+</div>
+<div class="relative z-10 flex gap-4 mt-4">
+<button class="flex cursor-pointer items-center gap-2 justify-center overflow-hidden rounded-lg h-12 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-[0_4px_14px_0_rgba(100,103,242,0.39)] hover:shadow-[0_6px_20px_rgba(100,103,242,0.23)] hover:-translate-y-0.5">
+<span class="material-symbols-outlined text-[20px]">play_circle</span>
+<span class="truncate">Start Playing</span>
+</button>
+<button class="flex cursor-pointer items-center gap-2 justify-center overflow-hidden rounded-lg h-12 px-8 bg-[#1e293b] border border-[#2d3b55] hover:border-primary/50 text-white text-base font-bold leading-normal transition-all hover:bg-[#253248]">
+<span class="material-symbols-outlined text-[20px]">shuffle</span>
+<span class="truncate">Random Game</span>
+</button>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between px-2 pb-6 pt-2">
+<h1 class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight flex items-center gap-3 transition-colors">
+<span class="w-1.5 h-8 bg-primary rounded-full block"></span>
+                            Available Games
+                        </h1>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-white border border-slate-200 dark:border-none dark:bg-[#1e293b] text-slate-500 dark:text-white/70 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 rounded-lg bg-white border border-slate-200 dark:border-none dark:bg-[#1e293b] text-slate-500 dark:text-white/70 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined">view_list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2">
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative overflow-hidden" data-alt="Abstract neon geometric numbers floating in dark space" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCU9WVspF1W0Hn4GWH187Y2kg95DZyi8n5ZLsQ4980lMumhYsq6Ys6X8kum2NcFZbz7QirzCp-adLwcDpjeZcoeedHGI3J9nMEyfCrLwgAg9HBrMUsrXjYeHtqHfVorrnCKbpftIU-qwkNx3prJEPtJkMKIehb23zegAoaP4DUxi6cNtFQnN3aG6hqKrs-VQNaKLFqGmCQXKLbx_NMuUZrTrzeljRRrOml1mGUu2l96BiWrdDy62RkIbrSUibR12MXsrcWXsVsJqs8");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Puzzle
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Number Guessing</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Test your logic with numbers. Can you guess the secret code?</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Pixel art style green snake pattern on dark grid" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBTmxovBf8xEQspNGo_7HeUgUDIb2xUX4_DgqaGCo8oMkovY_poI6HEDbi3IsJ8ZcZjzxWF95pB5jLYbQaoSFOJwcrTbH2Num2ktC9Jr65gwfQ6cXSOzax_F8a035NXqUOTXZjch4R2LCczRfWHjD51qM5dqclz18-W5NHo5gEMt8qiDXJGZSAwBMDCkYrALcjv2GYu36MObfSI8eo2fY3Qqw9znxPVXJFE3CDXxz0c-H7qBvIw_819ZfNIhVdz3g7WA0WYkD7dNn0");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Arcade
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Classic Snake</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Nostalgic snake arcade game. Eat, grow, and don't hit the wall!</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Various yellow emoji faces on dark background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDfgT4sRjoaOhU8YhFXP-rOCh9N_2jixGGuCCE69WYtUld039o4eNDuMgSC02cHb2OQmMkjXo4bcDVQ8UFloWIRKzRVimMhrP5rua3sBBy6YvtIV3XQ4J63nee2GJHIRRArzFNBPaCgWFjWIaqYb6y_6aIY-xauEoINYzVQzMV9bt9PeY492mGS74GcqdBw9dnvqxOuvS5-M0ilz99MwK5uf0mF22VuE_sYhnKAXNJXki3sHlybpuWcdDYdaM4iPX5j4FKq3_OxTEI");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Casual
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Expression Challenge</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Match the expressions fast before time runs out.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Splashed colorful fruit pieces in mid-air dark background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlKRbDffzG89E5xjDuw-qnKxvsBPa3Xck2lOvqprTk7Wtnj4iSHnJrKXCu4-sQF7QRdPwXgvAZ0eIrOToYKHLhaG4UW8KOHUaOaKOyZ9xAIG0mgPdK2ALG8KPGEPFOR5q3Nt53sZuDf1W0B-hRIdN3iQJTn5p-YH0o7duIboIAfr4I6FTPPQkYywJSuT5T28rB6lkJnIIw6mTnPJMqyDgnV1M3Eapqa-7sRQVqyvOHJkXwCXmBYC3Pp35hDwpV_zPUH3hOzP8-2nw");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Action
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Fruit Ninja</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Slice fruit, avoid bombs. The classic arcade experience.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Digital stopwatch glowing in dark room" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCx2SbflFzeBT1_CEGfx5Afhh7iSRSP5C1LA4mfqVSAH3tlCGxvS_L2Mdg3_8FHWsAmNkqBvLohR_l_etSEI-NoLTQto06ycNPFKDqQ6Y9dnCimtA3R6xZh3UcQaUCZSOKMmJFVkzTsd3pRywV11P22_9ltz6LUlLIpP6t6ievmQK09SZIMxA6VNh3BZKhtNRVB-v1HUnwQMmCwRUM6E-UfrYBUK7hLeTIV0Ch2MGomAOiWtMvn9fOKe6d2wAZzK1bJvd4fV3x2H2E");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Skill
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Reaction Click</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Test your reflexes. Click as fast as you can when the color changes.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Two game controllers side by side with opposing neon colors" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD--4V4oCHNumtP1Coiv_mcyB2XewwcZm2Nbd5IP8kHDtj8IR-0iAGcI_WYrNA2rUI4E70KZ3oynLIA2qfvSrPw4Bet0piprMdSKYR1iOzvxNp_t4-smjSAJfhCpCVBjSAa867Z4JpABFoJSvQwEZIQcQ-jkuObp0Ity_ZnXQoJgpNwcWX-Qk9j_mQx0TbZ23donfs4D6CMR-A_0amkyTJnkgAxIFlhx32Bl-pbkz46JlJs5UodoHVZN_QlyHrnjT__mbuDc7smZU0");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Co-op
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Two-Hand Battle</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Control two players at once. A true test of multitasking.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Sound equalizer bars with neon glowing blocks" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDVseSiNhV2eB1--fq_Ruux3v4oA1nqbdZPlO4-eafCgmjvPmFInM-Zt9OnhCbwxEsuvGhAqm6jltLytKRpaLoKVVlxdupp955DiUz945DVzpKDKHzZ-yxUbky0ZLDEHSOtu56ihTxOOPdudzdLjMnkqrtShBP5D6jIoEgBNAduUGbAE2pHCibZm7ZMCh8xRtdgvjpRX2HkT0yH14Mxkk_jwGFVuIkG0ghpWJ2vrKC0K70zRqv_1EGPedo54FNak3JJZh9IB3tKSbw");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Music
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Rhythm Blocks</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Hit the blocks to the beat. Feel the music and flow.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Matrix style digital rain with glowing characters" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuApj_L0fa_K0SODtaUOsZJgnB4PpFDt9P21vV6SLUPmKMm_rBASV2_x7SBw22EsZLo4DfauiHVkt8KAni7z5KNIlLqQHd9uaNIEpoM2n7YnmzoSCEa5HAlCIiy73oWKe9Q7zCtPUCbfQdrsuj1wLvV5SpDglz3NhQCQT3NXPY3atonj0lSDaevnP5p2T87P3ql3thT-f598TK4KEBQpgEJNFGB5j7BsukKRPJLPv2nXFOEeihH2tIqFBCz96f02g87gYjhweG-nXu0");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Typing
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Letter Rain</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Type the falling letters before they hit the ground.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Close up of a keyboard with WASD keys illuminated" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClKh8iAvvaxTgQWv8eKKfzZn_SR5biYH-19lppZ8xfJ16t9h5ANlypc-ql4KRJoWZrprBymt2bHEwnaohQxB8QkrGdy6dQi0XpUMXC7GuT8qGIybg97tND4XFzGdcKV5KoaoqT-7h6_sC8z0FBJ_1YNSga837EnK-RA5xEE-qORa9eQ_rwXiQeu3rUwOwVBWETKpWTLEIIjH8sCfQuva2yNlXeXDcHlHI0NRjI_xXaYh8I2fn_UMa5ZDKeZEptGfXmOtxxCS3_RrI");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Survival
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">WASD Dodge</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Dodge obstacles with WASD. Survial of the fittest.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Complex neon labyrinth maze seen from above" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB1KjIQvPT1alfbZCm_hu803IFSy6AyzhAK4Pmh_P4r_CJOByl9sr7WDTxDseBacp9v-JGVA-g7skTjy1mCL0M5TB6Vk8PNxURdJqBJ4uE_GgsPb0RvtVjrRsMmsdujEml1Z-JV0MXpZZXilM6WffaElim2D-0v1k7xbyo2CiiVl06zeWcvnbuGIV76inoeWfLEIhFhOD0IoAoUGF3Hxke9Df0TF4G3swW9-5GOPNTXciy7PTOpqfRo6xzAmLUWHd0WQf84PwrMyb8");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Logic
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Dual Maze</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Navigate two mazes simultaneously. Brain teasing action.</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full">
+<div class="w-full h-48 bg-center bg-no-repeat bg-cover relative" data-alt="Futuristic data nodes connected by glowing lines" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDYsT8PcNilH5PMST5hldQi3bkIxcihenccHGDEa6NSquqwD5muVo8np1faBwKKDAGvph347OxfN2eil7jS0Om7eluYq794XP42ZCArgeiZ4FR38Lt5ZYJuDKJuAIvvdfyU__AP7GS8AqJbvhXsUSGhqG-QFuDWSlhuC5sdmaIj9D7F0u9Z9dMSUuf8GFc748y0K1or8fmnxQR4jlIPrD-01TTSxcZQaoyz55Jb4RreDZJEOwu0ozCDYnDbqIGYY7kZcrUap-4AvOs");'>
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                                    Memory
+                                </div>
+</div>
+<div class="p-5 flex flex-col gap-3 flex-1">
+<div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">Key Memory</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">Memorize the key sequences. How far can you go?</p>
+</div>
+<div class="mt-auto pt-3">
+<button class="w-full h-10 rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:to-primary text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        開始遊戲
+                                    </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-slate-100 dark:bg-card-dark/50 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 overflow-hidden group h-full justify-center items-center p-5 hover:bg-white dark:hover:bg-card-dark transition-colors">
+<div class="flex flex-col items-center justify-center gap-3 text-slate-500 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-5xl">add_circle</span>
+<span class="font-bold">More Coming Soon</span>
+</div>
+</div>
+</div>
+<footer class="flex flex-col gap-6 px-5 py-10 mt-10 text-center border-t border-slate-200 dark:border-[#232448]">
+<div class="flex flex-wrap items-center justify-center gap-6">
+<a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">Contact Us</a>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">code</span>
+</a>
+<a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">alternate_email</span>
+</a>
+<a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">fiber_smart_record</span>
+</a>
+</div>
+<p class="text-slate-500 text-sm font-normal leading-normal">
+                            © 2024 Andy's Game Center. Created by Andy with ❤️
+                        </p>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>🎮 Andy's Game Center</title>
+    
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6366f1",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#101122",
+                        "card-dark": "#1e293b",
+                        "neon-cyan": "#4ade80",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .tech-glow-text {
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        html:not(.dark) .tech-glow-text {
+            text-shadow: none;
+            color: #6366f1;
+        }
+        .tech-card-hover {
+            transition: all 0.3s ease;
+        }
+        html.dark .tech-card-hover:hover {
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            transform: translateY(-4px);
+        }
+        html:not(.dark) .tech-card-hover:hover {
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            transform: translateY(-4px);
+            border-color: #6366f1;
+        }
+        
+        /* Game Modal Styles */
+        #game-modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #game-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+        #game-modal:not(.hidden) {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* Device Selection Screen */
+        #device-select {
+            transition: opacity 0.4s ease;
+        }
+        
+        /* Animation for fade-in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Game styles from good2.0.html */
+        .mobile-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            margin-top: 16px;
+            max-width: 180px;
+        }
+        .control-btn {
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.8);
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .empty-cell {
+            visibility: hidden;
+        }
+    </style>
+    
+    <!-- MediaPipe for Fruit Game -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 transition-colors duration-300">
+
+<!-- =========== Device Selection Screen =========== -->
+<div id="device-select" class="fixed inset-0 z-[1002] flex flex-col justify-center items-center bg-background-dark">
+    <h1 class="text-4xl font-bold mb-8 text-primary tech-glow-text">🎮 选择你的设备</h1>
+    <div class="flex gap-6">
+        <button id="pc-mode" class="px-8 py-4 text-lg font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+            电脑模式
+        </button>
+        <button id="mobile-mode" class="px-8 py-4 text-lg font-bold rounded-full bg-gradient-to-r from-emerald-600 to-green-500 text-white hover:from-emerald-500 hover:to-green-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+            手机模式
+        </button>
+    </div>
+    <p class="mt-6 text-slate-400">选择后进入游戏大厅</p>
+</div>
+
+<!-- =========== Game Modal (Hidden by default) =========== -->
+<div id="game-modal" class="hidden fixed inset-0 z-[1001] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div>
+                <h2 id="modal-game-title" class="text-2xl font-bold text-slate-800 dark:text-white"></h2>
+                <p id="modal-game-desc" class="text-slate-600 dark:text-slate-400 mt-1"></p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="modal-game-tag" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"></span>
+                <button id="close-modal" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Display Area -->
+        <div id="modal-game-area" class="flex-1 p-6 overflow-auto">
+            <div class="text-center text-slate-500 dark:text-slate-400 py-12">
+                点击下方的"开始游戏"按钮来启动游戏
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+            <div class="text-sm text-slate-500 dark:text-slate-400" id="device-hint"></div>
+            <div class="flex gap-3">
+                <button id="modal-back-btn" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    返回大厅
+                </button>
+                <button id="modal-start-btn" class="px-6 py-2 rounded-lg bg-gradient-to-r from-primary to-purple-600 text-white font-medium hover:opacity-90 transition-opacity">
+                    开始游戏
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========== Main Homepage (stitch design) =========== -->
+<div id="homepage" class="hidden relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+    <!-- Copy the stitch homepage content here -->
+    <div class="layout-container flex h-full grow flex-col">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#232448] px-4 py-3 lg:px-10 bg-white/95 dark:bg-[#111122]/90 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300 shadow-sm dark:shadow-none">
+            <div class="flex items-center gap-4 lg:gap-8">
+                <div class="flex items-center gap-2 lg:gap-4 text-slate-800 dark:text-white hover:text-primary dark:hover:text-primary transition-colors cursor-pointer">
+                    <div class="size-8 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-[32px]">sports_esports</span>
+                    </div>
+                    <h2 class="text-slate-800 dark:text-white text-lg lg:text-xl font-bold leading-tight tracking-[-0.015em] hidden sm:block">Andy's Game Center</h2>
+                </div>
+                <div class="hidden md:flex items-center gap-6">
+                    <a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">首页</a>
+                    <a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">排行榜</a>
+                    <a class="text-slate-600 dark:text-white/80 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">关于</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 lg:gap-6">
+                <label class="hidden sm:flex flex-col min-w-40 !h-10 max-w-64 group">
+                    <div class="flex w-full flex-1 items-stretch rounded-lg h-full ring-1 ring-slate-200 dark:ring-[#232448] focus-within:ring-primary transition-all bg-slate-50 dark:bg-[#1e293b]">
+                        <div class="text-slate-400 dark:text-[#9293c9] flex border-none bg-transparent items-center justify-center pl-3 rounded-l-lg border-r-0">
+                            <span class="material-symbols-outlined text-[20px]">search</span>
+                        </div>
+                        <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-l-none text-slate-800 dark:text-white focus:outline-0 border-none bg-transparent h-full placeholder:text-slate-400 dark:placeholder:text-[#5a5c8a] px-3 text-sm font-normal leading-normal" placeholder="搜索游戏..." value=""/>
+                    </div>
+                </label>
+                <button class="flex items-center justify-center w-10 h-10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1e293b] hover:text-primary dark:hover:text-neon-cyan transition-all dark:hover:shadow-[0_0_10px_rgba(74,222,128,0.4)]" title="刷新游戏">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+                <button class="flex items-center justify-center w-10 h-10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1e293b] hover:text-primary transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换亮色/暗色模式">
+                    <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+                    <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+                </button>
+                <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-md dark:shadow-[0_0_10px_rgba(100,103,242,0.4)]">
+                    <span class="truncate">登录</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-1 justify-center py-5 px-4 md:px-8 lg:px-20">
+            <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+                <div class="@container mb-10">
+                    <div class="flex min-h-[400px] flex-col gap-6 bg-cover bg-center bg-no-repeat rounded-xl items-center justify-center p-8 relative overflow-hidden group shadow-xl border border-slate-100 dark:border-none" style='background-image: linear-gradient(to bottom, rgba(248, 250, 252, 0.85), rgba(248, 250, 252, 0.95)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBB9NtlgA1S-8h7M6_y6ravuDdyKWN5q9eaicL0DKar9Tys1NKREcn5wDrfmRNo4IWSbx9Mpk84UdmS8GKfVxqtWyYFmy73ZbT_yRm9J80RMwL8pBNIzPVw3tfHiXFflUWyu28aIo9BdrQcG6o307X_8jxxSYM5uw4-YwCpicVFklEtb9kDQdE5PD3CatHt525sWTf3hdFMadYwQu3rwmtVX4ArnvJgF1j1I-3LykcE3CkPpc5IewXPLkJemmhNJwF0mwv-7fvibwE");'>
+                        <div class="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark via-transparent to-transparent opacity-90"></div>
+                        <div class="relative z-10 flex flex-col gap-4 text-center max-w-2xl animate-fade-in">
+                            <div class="inline-flex items-center justify-center p-3 bg-white dark:bg-primary/20 rounded-full w-16 h-16 mx-auto mb-2 border border-slate-200 dark:border-primary/50 shadow-md dark:shadow-[0_0_15px_rgba(100,103,242,0.5)]">
+                                <span class="material-symbols-outlined text-4xl text-primary dark:text-white">stadia_controller</span>
+                            </div>
+                            <h1 class="text-slate-800 dark:text-white text-4xl md:text-6xl font-black leading-tight tracking-[-0.033em] dark:tech-glow-text dark:!text-shadow-glow">
+                                🎮 Andy's Game Center
+                            </h1>
+                            <h2 class="text-slate-600 dark:text-slate-300 text-lg md:text-xl font-normal leading-relaxed">
+                                11 款小遊戲，一鍵即玩，無需下載！<br/>
+                                <span class="text-primary text-base opacity-80 font-mono mt-2 block">11 Mini-Games • Instant Play • No Download</span>
+                            </h2>
+                        </div>
+                        <div class="relative z-10 flex gap-4 mt-4">
+                            <button id="play-random-btn" class="flex cursor-pointer items-center gap-2 justify-center overflow-hidden rounded-lg h-12 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-[0_4px_14px_0_rgba(100,103,242,0.39)] hover:shadow-[0_6px_20px_rgba(100,103,242,0.23)] hover:-translate-y-0.5">
+                                <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                                <span class="truncate">开始游戏</span>
+                            </button>
+                            <button id="random-game-btn" class="flex cursor-pointer items-center gap-2 justify-center overflow-hidden rounded-lg h-12 px-8 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#2d3b55] hover:border-slate-300 dark:hover:border-primary/50 text-slate-700 dark:text-white text-base font-bold leading-normal transition-all hover:bg-slate-50 dark:hover:bg-[#253248]">
+                                <span class="material-symbols-outlined text-[20px]">shuffle</span>
+                                <span class="truncate">随机游戏</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between px-2 pb-6 pt-2">
+                    <h1 class="text-slate-800 dark:text-white tracking-tight text-3xl font-bold leading-tight flex items-center gap-3 transition-colors">
+                        <span class="w-1.5 h-8 bg-primary rounded-full block"></span>
+                        所有游戏
+                    </h1>
+                    <div class="flex gap-2">
+                        <button class="p-2 rounded-lg bg-white border border-slate-200 dark:border-none dark:bg-[#1e293b] text-slate-500 dark:text-white/70 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-primary/20 transition-all">
+                            <span class="material-symbols-outlined">grid_view</span>
+                        </button>
+                        <button class="p-2 rounded-lg bg-white border border-slate-200 dark:border-none dark:bg-[#1e293b] text-slate-500 dark:text-white/70 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-primary/20 transition-all">
+                            <span class="material-symbols-outlined">view_list</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Games Grid - Will be populated by JavaScript -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2" id="games-grid">
+                    <!-- Game cards will be inserted here -->
+                </div>
+
+                <footer class="flex flex-col gap-6 px-5 py-10 mt-10 text-center border-t border-slate-200 dark:border-[#232448]">
+                    <div class="flex flex-wrap items-center justify-center gap-6">
+                        <a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">隐私政策</a>
+                        <a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">服务条款</a>
+                        <a class="text-slate-500 hover:text-primary transition-colors text-base font-normal leading-normal" href="#">联系我们</a>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-6">
+                        <a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+                            <span class="material-symbols-outlined">code</span>
+                        </a>
+                        <a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+                            <span class="material-symbols-outlined">alternate_email</span>
+                        </a>
+                        <a class="text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-primary/20 p-2 rounded-full transition-all" href="#">
+                            <span class="material-symbols-outlined">fiber_smart_record</span>
+                        </a>
+                    </div>
+                    <p class="text-slate-500 text-sm font-normal leading-normal">
+                        © 2024 Andy's Game Center. Created by Andy with ❤️
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========== JavaScript Implementation =========== -->
+<script>
+// ========== Global State ==========
+let currentGame = null;
+let deviceMode = null;
+let gameModal = document.getElementById('game-modal');
+let modalGameArea = document.getElementById('modal-game-area');
+let modalGameTitle = document.getElementById('modal-game-title');
+let modalGameDesc = document.getElementById('modal-game-desc');
+let modalGameTag = document.getElementById('modal-game-tag');
+let deviceHint = document.getElementById('device-hint');
+
+// Game state variables from good2.0.html
+let snakeLoopId = null;
+let videoStream = null;
+let fruitAnimId = null;
+let fruitHands = null;
+let fruitCamera = null;
+let currentKeyHandler = null;
+
+// ========== Game Data ==========
+const games = [
+    { id: "guess", name: "数字猜猜猜", desc: "电脑想好 1-20 的數字，你來猜！越快猜中分數越高。", tag: "益智", color: "from-primary to-purple-600" },
+    { id: "snake", name: "经典贪吃蛇", desc: "控制小蛇吃食物變長，別撞牆也別咬到自己！", tag: "经典", color: "from-primary to-purple-600" },
+    { id: "camera", name: "表情挑战", desc: "打開攝像頭，在倒數結束時做出最誇張的表情並截圖。", tag: "互动", color: "from-primary to-purple-600" },
+    { id: "fruit", name: "切水果", desc: "在 PC 上用滑鼠拖動、在手機上用手勢切開飛來的水果！", tag: "动作", color: "from-primary to-purple-600" },
+    { id: "click", name: "反应力点击", desc: "綠色方塊隨機出現，盡快點擊測試你的反應速度。", tag: "反应", color: "from-primary to-purple-600" },
+    { id: "react-battle", name: "左右手对战", desc: "左手按 A/S/D，右手按 J/K/L，看誰反應更快！", tag: "对战", color: "from-primary to-purple-600" },
+    { id: "rhythm", name: "节奏下落块", desc: "F/G/H/J 四鍵下落，準確敲擊保持連擊高分。", tag: "节奏", color: "from-primary to-purple-600" },
+    { id: "type-rain", name: "字母雨打字", desc: "字母從天而降，快速輸入消除它們，練習打字速度。", tag: "打字", color: "from-primary to-purple-600" },
+    { id: "wasd-dodge", name: "WASD 躲避", desc: "用 WASD 控制方塊躲避紅色障礙，生存越久越好。", tag: "生存", color: "from-primary to-purple-600" },
+    { id: "dual-maze", name: "双手迷宫", desc: "左手控制左方塊，右手控制右方塊，同時到達終點！", tag: "协调", color: "from-primary to-purple-600" },
+    { id: "seq-memory", name: "按键记忆", desc: "記住閃現的按鍵序列（如 A ↑ D S），然後重複輸入。", tag: "记忆", color: "from-primary to-purple-600" }
+];
+
+// ========== Device Selection ==========
+document.getElementById('pc-mode').addEventListener('click', () => {
+    deviceMode = 'pc';
+    document.getElementById('device-select').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('device-select').style.display = 'none';
+        document.getElementById('homepage').classList.remove('hidden');
+        renderGameCards();
+    }, 400);
+});
+
+document.getElementById('mobile-mode').addEventListener('click', () => {
+    deviceMode = 'mobile';
+    document.getElementById('device-select').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('device-select').style.display = 'none';
+        document.getElementById('homepage').classList.remove('hidden');
+        renderGameCards();
+    }, 400);
+});
+
+// ========== Render Game Cards ==========
+function renderGameCards() {
+    const grid = document.getElementById('games-grid');
+    grid.innerHTML = '';
+    
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'flex flex-col bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/30 overflow-hidden tech-card-hover transition-all duration-300 group h-full';
+        card.innerHTML = `
+            <div class="w-full h-48 bg-center bg-no-repeat bg-cover relative overflow-hidden" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCU9WVspF1W0Hn4GWH187Y2kg95DZyi8n5ZLsQ4980lMumhYsq6Ys6X8kum2NcFZbz7QirzCp-adLwcDpjeZcoeedHGI3J9nMEyfCrLwgAg9HBrMUsrXjYeHtqHfVorrnCKbpftIU-qwkNx3prJEPtJkMKIehb23zegAoaP4DUxi6cNtFQnN3aG6hqKrs-VQNaKLFqGmCQXKLbx_NMuUZrTrzeljRRrOml1mGUu2l96BiWrdDy62RkIbrSUibR12MXsrcWXsVsJqs8');">
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+                <div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
+                    ${game.tag}
+                </div>
+            </div>
+            <div class="p-5 flex flex-col gap-3 flex-1">
+                <div>
+                    <h3 class="text-slate-800 dark:text-white text-xl font-bold leading-tight group-hover:text-primary transition-colors">${game.name}</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-relaxed mt-2 line-clamp-2">${game.desc}</p>
+                </div>
+                <div class="mt-auto pt-3">
+                    <button class="game-play-btn w-full h-10 rounded-lg bg-gradient-to-r ${game.color} text-white text-sm font-bold flex items-center justify-center gap-2 transition-all opacity-90 hover:opacity-100 shadow-lg shadow-primary/20" data-game="${game.id}">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                        開始遊戲
+                    </button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+    
+    // Add event listeners to play buttons
+    document.querySelectorAll('.game-play-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const gameId = e.target.closest('.game-play-btn').dataset.game;
+            openGameModal(gameId);
+        });
+    });
+}
+
+// ========== Game Modal Functions ==========
+function openGameModal(gameId) {
+    const game = games.find(g => g.id === gameId);
+    if (!game) return;
+    
+    currentGame = gameId;
+    modalGameTitle.textContent = game.name;
+    modalGameDesc.textContent = game.desc;
+    modalGameTag.textContent = game.tag;
+    
+    // Set device hint
+    if (deviceMode === 'pc') {
+        deviceHint.textContent = '电脑模式：使用键盘和鼠标进行游戏';
+    } else {
+        deviceHint.textContent = '手机模式：使用触摸屏和虚拟按键进行游戏';
+    }
+    
+    // Clear game area
+    modalGameArea.innerHTML = '<div class="text-center text-slate-500 dark:text-slate-400 py-12">点击"开始游戏"按钮来启动游戏</div>';
+    
+    // Show modal
+    gameModal.classList.remove('hidden');
+}
+
+function closeGameModal() {
+    // Clean up game resources
+    clearGameArea();
+    gameModal.classList.add('hidden');
+    currentGame = null;
+}
+
+// ========== Game Cleanup Function ==========
+function clearGameArea() {
+    modalGameArea.innerHTML = "";
+    modalGameArea.style.alignItems = "center";
+    modalGameArea.style.justifyContent = "center";
+    if (currentKeyHandler) {
+        window.removeEventListener("keydown", currentKeyHandler);
+        currentKeyHandler = null;
+    }
+    if (snakeLoopId) {
+        clearInterval(snakeLoopId);
+        snakeLoopId = null;
+    }
+    if (videoStream) {
+        videoStream.getTracks().forEach((t) => t.stop());
+        videoStream = null;
+    }
+    if (fruitAnimId) {
+        cancelAnimationFrame(fruitAnimId);
+        fruitAnimId = null;
+    }
+    if (fruitCamera && fruitCamera.stop) {
+        fruitCamera.stop();
+        fruitCamera = null;
+    }
+    if (fruitHands && fruitHands.close) {
+        fruitHands.close();
+        fruitHands = null;
+    }
+}
+
+// ========== Event Listeners ==========
+document.getElementById('close-modal').addEventListener('click', closeGameModal);
+document.getElementById('modal-back-btn').addEventListener('click', closeGameModal);
+
+document.getElementById('modal-start-btn').addEventListener('click', () => {
+    if (!currentGame) return;
+    
+    // Load the game implementation
+    loadGame(currentGame);
+});
+
+// ========== Game Loader ==========
+function loadGame(gameId) {
+    // Clear previous game
+    clearGameArea();
+    
+    // Create a container for the game
+    const gameContainer = document.createElement('div');
+    gameContainer.className = 'w-full h-full';
+    
+    // Based on the game ID, load the appropriate game
+    switch(gameId) {
+        case 'guess':
+            renderGuessGame(gameContainer);
+            break;
+        case 'snake':
+            renderSnakeGame(gameContainer);
+            break;
+        case 'camera':
+            renderCameraGame(gameContainer);
+            break;
+        case 'fruit':
+            renderFruitGame(gameContainer);
+            break;
+        case 'click':
+            renderClickGame(gameContainer);
+            break;
+        case 'react-battle':
+            renderReactBattleGame(gameContainer);
+            break;
+        case 'rhythm':
+            renderRhythmGame(gameContainer);
+            break;
+        case 'type-rain':
+            renderTypeRainGame(gameContainer);
+            break;
+        case 'wasd-dodge':
+            renderWasdDodgeGame(gameContainer);
+            break;
+        case 'dual-maze':
+            renderDualMazeGame(gameContainer);
+            break;
+        case 'seq-memory':
+            renderSeqMemoryGame(gameContainer);
+            break;
+        default:
+            gameContainer.innerHTML = '<div class="text-center text-slate-500 dark:text-slate-400 py-12">游戏加载中...</div>';
+    }
+    
+    modalGameArea.appendChild(gameContainer);
+}
+
+// ==================== 数字猜猜猜 ====================
+function renderGuessGame(container) {
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.flexDirection = "column";
+    wrapper.style.gap = "12px";
+    wrapper.style.width = "100%";
+    wrapper.style.maxWidth = "420px";
+    wrapper.innerHTML = `
+    <div style="display:flex; justify-content:space-between; font-size:13px; color:#9ca3af;">
+    <div>当前分数：<span id="g-score">20</span></div>
+    <div>最高分：<span id="g-best">0</span></div>
+    </div>
+    <div style="display:flex; justify-content:center; gap:12px;">
+    <div style="width:52px;height:52px;border-radius:12px;background:#020617;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;font-weight:600;">
+    <span id="g-secret">?</span>
+    </div>
+    <div style="width:52px;height:52px;border-radius:12px;background:#020617;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;font-weight:600;">
+    <span id="g-last">-</span>
+    </div>
+    </div>
+    <div id="g-status" style="min-height:20px;text-align:center;font-size:13px;"></div>
+    <div style="display:flex;gap:8px;">
+    <input id="g-input" type="number" min="1" max="20" placeholder="输入 1 - 20 之间的一个数字"
+    style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid #374151;background:#020617;color:#e5e7eb;font-size:13px;outline:none;" />
+    <button id="g-btn" style="border:none;border-radius:10px;padding:8px 12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;font-size:13px;font-weight:600;cursor:pointer;">猜一下</button>
+    </div>
+    <button id="g-again" style="margin-top:4px;border:none;border-radius:10px;padding:8px 12px;background:#111827;color:#e5e7eb;font-size:13px;cursor:pointer;width:100%;">重新开始</button>
+    `;
+    container.appendChild(wrapper);
+    let secret = Math.trunc(Math.random() * 20) + 1;
+    let score = 20;
+    let best = localStorage.getItem("guessBest") || 0;
+    const scoreEl = wrapper.querySelector("#g-score");
+    const bestEl = wrapper.querySelector("#g-best");
+    const statusEl = wrapper.querySelector("#g-status");
+    const secretEl = wrapper.querySelector("#g-secret");
+    const lastEl = wrapper.querySelector("#g-last");
+    const inputEl = wrapper.querySelector("#g-input");
+    const btnEl = wrapper.querySelector("#g-btn");
+    const againEl = wrapper.querySelector("#g-again");
+    bestEl.textContent = best;
+    function setStatus(msg, color = "#e5e7eb") {
+        statusEl.textContent = msg;
+        statusEl.style.color = color;
+    }
+    function reset() {
+        secret = Math.trunc(Math.random() * 20) + 1;
+        score = 20;
+        scoreEl.textContent = score;
+        secretEl.textContent = "?";
+        lastEl.textContent = "-";
