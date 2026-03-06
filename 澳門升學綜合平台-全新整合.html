@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>澳門升學綜合平台 | Macau Education Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003366",
+                        "accent": "#D4AF37",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Styles from 升學.html */
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .badge-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+        .badge-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+        .badge-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+        
+        .info-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .info-table th, .info-table td { padding: 12px; text-align: left; border-bottom: 1px solid #E8E8E8; }
+        .info-table th { background: #FAFAFA; font-weight: 600; color: #595959; }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { background: #F5F5F5; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; color: #595959; border: 1px solid #D9D9D9; }
+        
+        .simulator-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 1rem; }
+        .btn-primary { width: 100%; background: #1890FF; color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 500; transition: 0.3s; }
+        .btn-primary:hover { background: #40a9ff; }
+        
+        .result-area { margin-top: 30px; padding-top: 20px; border-top: 1px solid #E8E8E8; display: none; }
+        .result-card { background: #F6FFED; border: 1px solid #B7EB8F; padding: 20px; border-radius: 4px; margin-bottom: 15px; }
+        .result-title { font-weight: bold; color: #389E0D; margin-bottom: 10px; display: block; }
+        
+        .countdown { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: #001529; text-align: center; }
+        
+        .disclaimer {
+            background: #FFFbe6;
+            border: 1px solid #ffe58f;
+            color: #876800;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .status-live { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-demo { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        
+        .official-links {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #E8E8E8;
+        }
+        .official-links a {
+            display: block;
+            color: #1890FF;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+        .official-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="min-h-screen">
+    
+    <!-- Header from 澳門升學綜合平台.html -->
+    <header class="flex items-center justify-between px-6 py-4 lg:px-20 border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="size-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                <span class="material-symbols-outlined text-white text-2xl">school</span>
+            </div>
+            <div class="flex flex-col">
+                <h2 class="text-primary dark:text-slate-100 text-xl font-black">澳門升學綜合平台</h2>
+                <span class="text-[10px] uppercase tracking-widest text-accent font-bold">一站式規劃服務</span>
+            </div>
+        </div>
+        
+        <!-- Navigation updated with all pages -->
+        <nav class="hidden md:flex items-center gap-6">
+            <button onclick="showPage('home')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary active" id="nav-home">首頁儀表板</button>
+            <button onclick="showPage('baosong')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary" id="nav-baosong">保送生大全</button>
+            <button onclick="showPage('four-uni')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary" id="nav-four-uni">四校聯考</button>
+            <button onclick="showPage('simulator')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary" id="nav-simulator">智能測評</button>
+        </nav>
+        
+        <div class="flex items-center gap-3">
+            <button class="hidden sm:flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 border-2 border-primary/10 text-primary dark:text-slate-100 text-sm font-bold">
+                <span>登錄</span>
+            </button>
+            <button class="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
+                <span>註冊</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero from 澳門升學綜合平台.html -->
+        <section class="relative px-6 py-12 lg:px-20 lg:py-24 bg-gradient-to-br from-background-dark to-primary">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col lg:flex-row items-center gap-16">
+                    <div class="flex-1 text-center lg:text-left">
+                        <div class="relative inline-block mb-8">
+                            <div class="relative flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/30 bg-background-dark/50 mx-auto lg:mx-0">
+                                <span class="material-symbols-outlined text-5xl md:text-6xl text-accent">explore</span>
+                            </div>
+                        </div>
+                        
+                        <h1 class="text-white text-5xl md:text-7xl font-black mb-6">
+                            澳門內地升學導航
+                        </h1>
+                        <p class="text-slate-300 text-lg md:text-xl mb-10">
+                            專注於澳門學生赴內地升學的專業諮詢門戶<br/>
+                            極簡規劃 · 專注未來 · 一站式服務
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                            <button onclick="showPage('simulator')" class="flex items-center justify-center gap-2 rounded-xl h-14 px-8 bg-primary text-white text-lg font-bold">
+                                <span>開始智能測評</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button onclick="showPage('baosong')" class="flex items-center justify-center gap-2 rounded-xl h-14 px-8 border-2 border-white/30 text-white text-lg font-bold">
+                                <span>了解保送生計劃</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats from 澳門升學綜合平台.html -->
+                    <div class="flex-1">
+                        <div class="bg-white/10 rounded-2xl p-8 border border-white/20">
+                            <div class="flex items-center gap-6 mb-8">
+                                <div class="flex -space-x-3">
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200"></div>
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200"></div>
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200"></div>
+                                    <div class="flex size-10 items-center justify-center rounded-full border-2 border-white bg-primary text-[10px] font-bold text-white">+5k</div>
+                                </div>
+                                <div class="text-sm text-slate-300">
+                                    已有超過 <span class="font-bold text-accent">5,000+</span> 澳門學生成功規劃
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col items-center text-center gap-2 p-4 bg-white/5 rounded-xl">
+                                    <p class="text-white/70 text-sm">覆蓋高校</p>
+                                    <p class="text-accent text-3xl font-black">100+</p>

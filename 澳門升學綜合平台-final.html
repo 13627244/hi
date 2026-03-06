@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>澳門升學綜合平台 | Macau Education Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003366",
+                        "accent": "#D4AF37",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                        "secondary": "#135bec",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .cta-gradient {
+            background: linear-gradient(135deg, #003366 0%, #0052a3 100%);
+        }
+        .logo-gradient {
+            background: linear-gradient(135deg, #003366 0%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-gradient {
+            background: linear-gradient(rgba(16, 22, 34, 0.85), rgba(16, 22, 34, 0.95));
+        }
+        
+        .page-section { display: none; animation: fadeIn 0.4s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .countdown {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #001529;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+    
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 px-6 py-4 lg:px-20 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="relative size-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                <span class="material-symbols-outlined text-white text-2xl">school</span>
+            </div>
+            <div class="flex flex-col">
+                <h2 class="text-primary dark:text-slate-100 text-xl font-black leading-tight tracking-tight">澳門升學綜合平台</h2>
+                <span class="text-[10px] uppercase tracking-widest text-accent font-bold">一站式規劃服務</span>
+            </div>
+        </div>
+        
+        <nav class="hidden md:flex items-center gap-6">
+            <button onclick="showPage('home')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors active" id="nav-home">首頁儀表板</button>
+            <button onclick="showPage('baosong')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" id="nav-baosong">保送生大全</button>
+            <button onclick="showPage('pathways')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" id="nav-pathways">多元途徑</button>
+            <button onclick="showPage('simulator')" class="text-primary/80 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" id="nav-simulator">智能測評</button>
+        </nav>
+        
+        <div class="flex items-center gap-3">
+            <button class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 border-2 border-primary/10 text-primary dark:text-slate-100 text-sm font-bold hover:bg-primary/5 transition-all">
+                <span>登錄</span>
+            </button>
+            <button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <span>註冊</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        <!-- Hero Section -->
+        <section class="relative px-6 py-12 lg:px-20 lg:py-24 overflow-hidden bg-gradient-to-br from-background-dark to-primary">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 hero-gradient z-10"></div>
+                <div class="w-full h-full bg-cover bg-center grayscale opacity-20" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA7K2VMrQ6XKYGqK6PuEUAxcqAyxJ7KttcceA3JoZCwKhHDPfm8DI_zfUQEQMCA7zr-r-r_D4n0s76wDDlmZXh5_HxSbR5UsJ_9IXAufKLEenkxMt_8makAOlXtCjhehLgGor0XqJzXwAVDBWcWtBbwZ0DDH4UDZ-CO0C2mE0JP8ZdCpWNeMXqUujVe_ZR7VgHUv6EFQfuReV7fG2YFhTRwCGCkVpz0e5VLLQmOD7lu5Kefums67CCjyClJGJUUWpmQxSEXYfXCYGQI');"></div>
+            </div>
+            
+            <div class="relative z-20 max-w-7xl mx-auto">
+                <div class="flex flex-col lg:flex-row items-center gap-16">
+                    <div class="flex-1 text-center lg:text-left">
+                        <div class="relative inline-block mb-8">
+                            <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
+                            <div class="relative flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/30 bg-background-dark/50 backdrop-blur-sm mx-auto lg:mx-0">
+                                <span class="material-symbols-outlined text-5xl md:text-6xl text-accent">explore</span>
+                            </div>
+                        </div>
+                        
+                        <h1 class="text-white text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
+                            澳門內地升學導航
+                        </h1>
+                        <p class="text-slate-300 text-lg md:text-xl font-light max-w-2xl leading-relaxed mb-10">
+                            專注於澳門學生赴內地升學的專業諮詢門戶<br/>
+                            極簡規劃 · 專注未來 · 一站式服務
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                            <button class="cta-gradient flex items-center justify-center gap-2 rounded-xl h-14 px-8 text-white text-lg font-bold shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
+                                <span>開始規劃你的升學藍圖</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button class="flex items-center justify-center gap-2 rounded-xl h-14 px-8 border-2 border-white/30 text-white text-lg font-bold hover:bg-white/10 transition-all">
+                                <span>了解更多</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                            <div class="flex items-center gap-6 mb-8">
+                                <div class="flex -space-x-3">
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAL3lp6cQ1yyd5CfhzhW2OLcDKAJnc3Z9caj5jKN7743licuLVF7McXrjhajQAaZA-zp67f59iKVJFCZPALQKiFC8j44hgylOsAKk8JCA5Z8tf15HRB2mdjSu9tjwHOI3E6wsNQ_9Md__3mPtCFzlqseKRDZ778tLuyjcTD7f7DCMXGWGl_X_bAi2yfiCxQ0SwzsLH0vHVpeNuPD5wsUyvJwNrbHQjR9pGrjAYfB38Q9zzu3YJ0r0Tjr-CDXcba1e5JUXevfbDbM7mq')"></div>
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNArLofSgSmgLhf-rXDYbleZrFljuRYiZmquDdzsDMu5w3GRbQlUJzgFRrP3MxNS2RhIdRxOBfPNSwpAPpjDUHTb9Avng3nYJnIiKfYpBVtMqvOYw2iQoCqxzpIjrDvg0tNAdRC0Hnpw45UwrhID8ugPi2n0c6goZXAHhCJEL6TQqNlpX4tr5jeWQ8gjJDyW7Zk1kdENRNwtYPcDuyZeB2P8vkSQW38YTsL65fbVQ9VJXArEirO2ycNUAMf2Gj2Zu8kGBM_jLTmq-b')"></div>
+                                    <div class="size-10 rounded-full border-2 border-white bg-slate-200 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKONCxz_DfOMtSkjdjdmJB7W6A8INayFbrrQo9A2kQCscvsjpm2Dpinxqd_fRLRwA0SIkngJPZu8eFPV5GD-uee9HgZ5CfpnyI1e5-I5vZy9gL-tLi07LjWQqrtYdAuILHFqbic0Ml1KKxdzXL1ZOJ4O_GUHcn_62frGS3fBQBHm0K1fMq6OIe5oMhviEVcjrEd0I8wh8kWmAqzyCtZygMqpMQwp1PQCfQRCjl1Kx8vzVG6t1-ZmbqwznUSwlVsfT6qWxz5QpC18vv')"></div>
+                                    <div class="flex size-10 items-center justify-center rounded-full border-2 border-white bg-primary text-[10px] font-bold text-white uppercase tracking-tighter">+5k</div>
+                                </div>
+                                <div class="text-sm text-slate-300">
+                                    已有超過 <span class="font-bold text-accent">5,000+</span> 澳門學生成功規劃
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col items-center text-center gap-2 p-4 bg-white/5 rounded-xl">
+                                    <p class="text-white/70 text-sm font-medium uppercase tracking-widest">覆蓋高校</p>
+                                    <p class="text-accent text-3xl font-black">100+</p>
+                                    <p class="text-white/50 text-xs">內地重點大學</p>
+                                </div>
+                                <div class="flex flex-col items-center text-center gap-2 p-4 bg-white/5 rounded-xl">
+                                    <p class="text-white/70 text-sm font-medium uppercase tracking-widest">服務學生</p>
+                                    <p class="text-accent text-3xl font-black">5,000+</p>
+                                    <p class="text-white/50 text-xs">每年度諮詢人數</p>
+                                </div>
+                                <div class="flex flex-col items-center text-center gap-2 p-4 bg-white/5 rounded-xl">
+                                    <p class="text-white/70 text-sm font-medium uppercase tracking-widest">錄取率</p>
+                                    <p class="text-accent text-3xl font-black">95%</p>
+                                    <p class="text-white/50 text-xs">諮詢學生成功率</p>
+                                </div>
+                                <div class="flex flex-col items-center text-center gap-2 p-4 bg-white/5 rounded-xl">
+                                    <p class="text-white/70 text-sm font-medium uppercase tracking-widest">導師團隊</p>
+                                    <p class="text-accent text-3xl font-black">50+</p>
+                                    <p class="text-white/50 text-xs">專業升學顧問</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page Sections -->
+        <div id="home" class="page-section active px-6 py-12 lg:px-20 lg:py-16">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-slate-900 dark:text-white text-3xl lg:text-4xl font-black tracking-tight mb-8">多元入學途徑</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                    <div class="group bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-accent/50 transition-all duration-300">
+                        <div class="size-14 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                        </div>
+                        <h3 class="text-slate-900 dark:text-white text-xl font-bold mb-3">保送生計劃</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">校內優異表現通道，直升內地名牌大學。專門針對高中三年成績優異的澳門本地學生。</p>
+                        <div class="mt-6 flex items-center gap-2 text-primary dark:text-accent font-bold text-sm cursor-pointer group-hover:gap-4 transition-all">
+                            <span>立即探索</span>
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </div>
+                    </div>
+                    <div class="group bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300">
+                        <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:text-primary-light mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">hub</span>
+                        </div>
+                        <h3 class="text-slate-900 dark:text-white text-xl font-bold mb-3">兩校聯考</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">暨南大學與華僑大學專項指引，精準掌握各專業入學要求與往年真題分析。</p>
+                        <div class="mt-6 flex items-center gap-2 text-primary dark:text-accent font-bold text-sm cursor-pointer group-hover:gap-4

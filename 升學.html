@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門內地升學導航站 | Macao-Mainland University Navigator</title>
+    <style>
+        :root {
+            --primary-color: #001529;
+            --accent-color: #1890FF;
+            --bg-color: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --text-main: #262626;
+            --text-secondary: #595959;
+            --border-color: #E8E8E8;
+            --success-color: #52C41A;
+            --warning-color: #FAAD14;
+            --danger-color: #FF4D4F;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: 1px; }
+
+        nav button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.85);
+            padding: 0 20px;
+            height: 64px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        nav button:hover { color: white; background: rgba(255,255,255,0.1); }
+        nav button.active { color: white; border-bottom-color: var(--accent-color); font-weight: 500; }
+
+        .container { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
+        .page-section { display: none; animation: fadeIn 0.4s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px; }
+        .card {
+            background: var(--card-bg);
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 2px -2px rgba(0,0,0,0.16), 0 3px 6px 0 rgba(0,0,0,0.12);
+            border-top: 3px solid transparent;
+        }
+        .card.highlight { border-top-color: var(--accent-color); }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; }
+        
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .badge-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+        .badge-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+        .badge-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+        
+        .info-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .info-table th, .info-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .info-table th { background: #FAFAFA; font-weight: 600; color: var(--text-secondary); }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { background: #F5F5F5; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; color: var(--text-secondary); border: 1px solid #D9D9D9; }
+
+        .simulator-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; }
+        .btn-primary { width: 100%; background: var(--accent-color); color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 500; transition: 0.3s; }
+        .btn-primary:hover { background: #40a9ff; }
+        
+        .result-area { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); display: none; }
+        .result-card { background: #F6FFED; border: 1px solid #B7EB8F; padding: 20px; border-radius: 4px; margin-bottom: 15px; }
+        .result-title { font-weight: bold; color: #389E0D; margin-bottom: 10px; display: block; }
+
+        .countdown { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: var(--primary-color); text-align: center; }
+        
+        .disclaimer {
+            background: #FFFbe6;
+            border: 1px solid #ffe58f;
+            color: #876800;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .status-live { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-demo { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+
+        .official-links {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .official-links a {
+            display: block;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+        .official-links a:hover { text-decoration: underline; }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">M-M Navigator</div>
+    <nav>
+        <button onclick="showPage('home')" class="active" id="nav-home">首頁儀表板</button>
+        <button onclick="showPage('baosong')" id="nav-baosong">保送生大全</button>
+        <button onclick="showPage('four-uni')" id="nav-four-uni">四校聯考</button>
+        <button onclick="showPage('simulator')" id="nav-simulator">智能測評與模擬</button>
+    </nav>
+</header>
+
+<div class="container">
+
+    <!-- ================= PAGE 1: HOME DASHBOARD ================= -->
+    <div id="home" class="page-section active">
+        
+        <div class="disclaimer">
+            <span>⚠️</span>
+            <div>
+                <strong>重要提示</strong>
+                本網站倒數計時數據來源：<span id="data-source">Google Sheets 雲端配置</span> 
+                <span id="data-status" class="status-badge status-demo">載入中...</span>
+                <br>
+                最終報名日期請務必以 <strong><a href="https://www.dsedj.gov.mo" target="_blank" style="color:#0050b3">教育及青年發展局 (DSEDJ)</a></strong> 官方公佈為準。
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="color: var(--primary-color); font-size: 2.2rem; margin-bottom: 10px;">澳門學生內地升學一站式平台</h1>
+            <p style="color: var(--text-secondary);">專業資訊整合 · 智能升學規劃 · 名校數據分析</p>
+        </div>
+
+        <div class="grid">
+            <!-- Countdown Card -->
+            <div class="card highlight">
+                <div class="card-title">關鍵時間節點 <span class="badge badge-orange">自動同步</span></div>
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 5px;">🎓 保送生報名截止</div>
+                    <div class="countdown" id="timer-baosong">同步日期中...</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 5px;">📝 四校聯考報名截止</div>
+                    <div class="countdown" id="timer-4u">同步日期中...</div>
+                </div>
+                
+                <div class="official-links">
+                    <strong>🔗 官方資訊來源：</strong>
+                    <a href="https://www.dsedj.gov.mo/webdsejspace/internet/Inter_main_page.jsp?id=4739" target="_blank">📌 DSEDJ 保送生專頁</a>
+                    <a href="https://www.4uaexams.edu.mo" target="_blank">📌 四校聯考官方網站</a>
+                    <a href="https://www.dsedj.gov.mo/webdsejspace/internet/Inter_main_page.jsp?id=8760" target="_blank">📌 內地高校免試招生計劃</a>
+                </div>
+            </div>
+
+            <!-- Path Overview -->
+            <div class="card">
+                <div class="card-title">三大升學路徑</div>
+                <ul style="padding-left: 20px; color: var(--text-secondary);">
+                    <li style="margin-bottom: 10px;"><strong>保送生計劃：</strong>憑校內排名 + 面試，免筆試進入 90+ 所內地名校。</li>
+                    <li style="margin-bottom: 10px;"><strong>全國聯考：</strong>針對澳門學生的獨立試卷，競爭相對較小。</li>
+                    <li><strong>四校聯考：</strong>澳大、理工、旅遊、科大聯合考試，本地升學主力。</li>
+                </ul>
+                <button onclick="showPage('simulator')" class="btn-primary" style="margin-top: 15px; background: var(--primary-color);">開始智能測評</button>
+            </div>
+
+            <!-- News/Tip -->
+            <div class="card">
+                <div class="card-title">最新升學動態</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                    <p style="border-bottom: 1px dashed var(--border-color); padding: 8px 0;">📢 內地高校免試招收澳門學生計劃名額近年穩定增加。</p>
+                    <p style="border-bottom: 1px dashed var(--border-color); padding: 8px 0;">📢 清華、北大保送生面試環節日益重視綜合素質與創新思維。</p>
+                    <p style="padding: 8px 0;">📢 四校聯考報名系統通常於每年 11 月開放，請提前準備身份證明文件。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 2: BAOSONG DETAILS ================= -->
+    <div id="baosong" class="page-section">
+        <h2 style="color: var(--primary-color); border-left: 5px solid var(--accent-color); padding-left: 15px;">內地高校保送生計劃詳解</h2>
+        <div class="disclaimer" style="margin-top: 20px;">
+            <span>ℹ️</span>
+            <div>
+                <strong>數據說明：</strong> 以下排名要求為歷年經驗值，非絕對標準。具體名額分配由就讀中學與大學協商決定。
+                <br><small>最後更新：<span id="baosong-last-update">自動同步中</span></small>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card highlight">
+                <div class="card-title">清華大學 <span class="badge badge-blue">Top 1</span></div>
+                <div class="info-table">
+                    <tr><th>參考排名</th><td>校內前 5-10 名 (視學校規模)</td></tr>
+                    <tr><th>考核形式</th><td>筆試 (數理化) + 多輪面試</td></tr>
+                    <tr><th>熱門學科</th><td><div class="tag-container"><span class="tag">計算機</span><span class="tag">電子工程</span><span class="tag">經管</span><span class="tag">建築</span></div></td></tr>
+                </div>
+            </div>
+
+            <div class="card highlight">
+                <div class="card-title">北京大學 <span class="badge badge-blue">Top 1</span></div>
+                <div class="info-table">
+                    <tr><th>參考排名</th><td>校內前 5-10 名</td></tr>
+                    <tr><th>考核形式</th><td>筆試 (語數英 + 綜合) + 面試</td></tr>
+                    <tr><th>熱門學科</th><td><div class="tag-container"><span class="tag">中文</span><span class="tag">法律</span><span class="tag">光華管理</span><span class="tag">國際關係</span></div></td></tr>
+                </div>
+            </div>
+
+            <div class="card highlight">
+                <div class="card-title">復旦大學 <span class="badge badge-blue">Top 3</span></div>
+                <div class="info-table">
+                    <tr><th>參考排名</th><td>校內前 15%-20%</td></tr>
+                    <tr><th>考核形式</th><td>面試為主 (部分專業有筆試)</td></tr>
+                    <tr><th>熱門學科</th><td><div class="tag-container"><span class="tag">新聞傳播</span><span class="tag">經濟</span><span class="tag">數學</span><span class="tag">醫學</span></div></td></tr>
+                </div>
+            </div>
+
+            <div class="card highlight">
+                <div class="card-title">上海交通大學 <span class="badge badge-blue">Top 3</span></div>
+                <div class="info-table">
+                    <tr><th>參考排名</th><td>校內前 15%-20%</td></tr>
+                    <tr><th>考核形式</th><td>筆試 (數理化) + 面試</td></tr>
+                    <tr><th>熱門學科</th><td><div class="tag-container"><span class="tag">機械工程</span><span class="tag">船海</span><span class="tag">計算機</span><span class="tag">安泰經管</span></div></td></tr>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">其他熱門保送院校</div>
+            <div class="tag-container" style="margin-top: 10px;">
+                <span class="tag">浙江大學</span><span class="tag">南京大學</span><span class="tag">中國人民大學</span>
+                <span class="tag">同濟大學</span><span class="tag">武漢大學</span><span class="tag">中山大學</span>
+                <span class="tag">廈門大學</span><span class="tag">暨南大學</span><span class="tag">華南理工大學</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 3: FOUR UNI EXAM ================= -->
+    <div id="four-uni" class="page-section">
+        <h2 style="color: var(--primary-color); border-left: 5px solid var(--accent-color); padding-left: 15px;">澳門四校聯考指南</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">由澳門大學、澳門理工大學、澳門旅遊大學、澳門科技大學聯合舉辦。</p>
+
+        <div class="grid">
+            <div class="card highlight">
+                <div class="card-title">考試科目</div>
+                <ul style="padding-left: 20px; color: var(--text-secondary);">
+                    <li style="margin-bottom: 10px;"><strong>中文 (必考)</strong>：閱讀、寫作、文學</li>
+                    <li style="margin-bottom: 10px;"><strong>英文 (必考)</strong>：聽力、閱讀、寫作</li>
+                    <li style="margin-bottom: 10px;"><strong>數學 (必考)</strong>：數學 I (文商) / 數學 II (理工)</li>
+                    <li><strong>葡文 (選考)</strong>：僅特定課程需要</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">四大高校推薦專業</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                    <p><strong>🎓 澳門大學</strong>：工商管理、法學、微電子、中醫藥</p>
+                    <p><strong>🎓 澳門理工</strong>：翻譯、電腦科學、藝術設計</p>
+                    <p><strong>🎓 澳門旅遊</strong>：酒店管理、餐飲管理、遺產保護</p>
+                    <p><strong>🎓 澳門科技</strong>：藥學、資訊科技、電影製作</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 4: SMART SIMULATOR ================= -->
+    <div id="simulator" class="page-section">
+        <div class="simulator-box">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 10px;">🧭 智能升學測評</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">完成問卷，獲取專屬升學建議</p>
+
+            <div class="form-group">
+                <label>測評模式：</label>
+                <select id="mode-select" class="form-control" onchange="toggleMode()">
+                    <option value="quiz">🎯 潛能與方向測評 (推薦)</option>
+                    <option value="score">📊 錄取概率模擬</option>
+                </select>
+            </div>
+
+            <div id="quiz-form">
+                <div class="form-group">
+                    <label>1. 你最擅長的科目類型？</label>
+                    <select id="q1" class="form-control">
+                        <option value="science">理科 (數理化生)</option>
+                        <option value="arts">文科 (語史地)</option>
+                        <option value="business">商科/社會</option>
+                        <option value="art_design">藝術/創意</option>
+                        <option value="lang">語言類</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>2. 你喜歡的解決問題方式？</label>
+                    <select id="q2" class="form-control">
+                        <option value="logic">邏輯推理與數據分析</option>
+                        <option value="creative">創意發想與表達</option>
+                        <option value="people">與人溝通與協調</option>
+                        <option value="practical">實際操作與實驗</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>3. 你的校內排名大約？</label>
+                    <select id="q4" class="form-control">
+                        <option value="top5">前 5% (頂尖)</option>
+                        <option value="top15">前 5-15% (優秀)</option>
+                        <option value="top30">前 15-30% (良好)</option>
+                        <option value="below30">30% 以後</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="runQuiz()">生成報告</button>
+            </div>
+
+            <div id="score-form" style="display: none;">
+                <div class="form-group">
+                    <label>升學途徑：</label>
+                    <select id="s-path" class="form-control">
+                        <option value="baosong">保送生計劃</option>
+                        <option value="liankao">全國聯考</option>
+                        <option value="4u">四校聯考</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>校內排名 (前 %):</label>
+                    <input type="number" id="s-rank" class="form-control" placeholder="例如：10">
+                </div>
+                <button class="btn-primary" onclick="runScoreSim()">開始模擬</button>
+            </div>
+
+            <div id="result-area" class="result-area">
+                <h3 style="color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">📊 分析結果</h3>
+                <div class="result-card">
+                    <span class="result-title">🎯 推薦專業</span>
+                    <p id="res-major" style="margin: 0; font-weight: 500;">--</p>
+                </div>
+                <div class="result-card" style="background: #E6F7FF; border-color: #91D5FF;">
+                    <span class="result-title" style="color: #096DD9;">🏫 匹配院校</span>
+                    <div id="res-unis" class="tag-container" style="margin-top: 10px;"></div>
+                </div>
+                <div class="result-card" style="background: #FFF7E6; border-color: #FFD591;">
+                    <span class="result-title" style="color: #FA8C16;">💡 備考建議</span>
+                    <p id="res-strategy" style="margin: 0; font-size: 0.95rem;">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2026 澳門內地升學導航站 | 數據自動同步自雲端配置</p>
+    <p>🔧 管理員：只需更新 Google Sheets，全站日期即時同步</p>
+    <p style="margin-top: 10px;">
+        <a href="mailto:your-email@example.com?subject=日期回報" style="color: var(--accent-color); text-decoration: none;">
+            📧 發現日期有誤？點擊回報
+        </a>
+    </p>
+</footer>
+
+<script>
+    // ========== 頁面導航 ==========
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        document.getElementById('nav-' + pageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    // ========== 模擬器模式切換 ==========
+    function toggleMode() {
+        const mode = document.getElementById('mode-select').value;
+        document.getElementById('quiz-form').style.display = mode === 'quiz' ? 'block' : 'none';
+        document.getElementById('score-form').style.display = mode === 'score' ? 'block' : 'none';
+        document.getElementById('result-area').style.display = 'none';
+    }
+
+    // ========== 問卷邏輯 ==========
+    function runQuiz() {
+        const q1 = document.getElementById('q1').value;
+        const q2 = document.getElementById('q2').value;
+        const rank = document.getElementById('q4').value;
+        
+        let major = "", unis = [], strategy = "";
+        
+        if (q1 === 'science' || q2 === 'logic') {
+            major = "理工科類 (計算機、電子工程、數據科學)";
+            unis = rank <= 'top15' ? 
+                ["清華大學", "北京大學", "上海交通大學", "澳門大學"] : 
+                ["同濟大學", "華南理工大學", "澳門科技大學"];
+            strategy = rank <= 'top15' ? 
+                "排名優秀！主攻清北復交保送面試，準備奧賽級數理題。" : 
+                "建議重點準備聯考/四校聯考，保送可嘗試中等 985 高校。";
+        } else if (q1 === 'arts' || q2 === 'creative') {
+            major = "人文社科類 (新聞、法律、中文、國際關係)";
+            unis = rank <= 'top15' ? 
+                ["北京大學", "復旦大學", "中國人民大學", "澳門大學"] : 
+                ["廈門大學", "中山大學", "暨南大學"];
+            strategy = rank <= 'top15' ? 
+                "頂尖名校看重面試表達與社會洞察力，多練時事評論。" : 
+                "發揮寫作特長，準備優秀 PS，聯考/四校聯考文科專業也不錯。";
+        } else {
+            major = "商業管理類 (金融、會計、工商管理)";
+            unis = rank <= 'top15' ? 
+                ["清華經管", "北大光華", "交大安泰", "澳門大學"] : 
+                ["對外經貿", "澳門科技大學商學院"];
+            strategy = "商科競爭大，建議參加商業競賽豐富履歷，考取語言證書加分。";
+        }
+
+        document.getElementById('res-major').innerText = major;
+        document.getElementById('res-strategy').innerText = strategy;
+        
+        const container = document.getElementById('res-unis');
+        container.innerHTML = '';
+        unis.forEach(u => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.style.cssText = 'background:#e6f7ff;color:#1890ff;border-color:#91d5ff';
+            span.innerText = u;
+            container.appendChild(span);
+        });
+        
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ========== 分數模擬邏輯 ==========
+    function runScoreSim() {
+        const path = document.getElementById('s-path').value;
+        const rank = parseInt(document.getElementById('s-rank').value) || 50;
+        
+        let unis = [], strategy = "";
+        if (path === 'baosong') {
+            if (rank <= 10) {
+                unis = ["清華", "北大", "復旦", "交大"];
+                strategy = "排名頂尖！全力準備面試，展現綜合素質。";
+            } else if (rank <= 25) {
+                unis = ["浙大", "南大", "同濟", "中山"];
+                strategy = "排名優秀，鎖定華東五校及中堅 985，廣撒網申請 3-5 所。";
+            } else {
+                unis = ["暨南大學", "廈門大學", "澳門大學"];
+                strategy = "建議保守策略，重點考慮暨大或轉向四校聯考。";
+            }
+        } else if (path === '4u') {
+            unis = ["澳門大學", "澳門理工", "澳門旅遊", "澳門科技"];
+            strategy = "紮實基礎，確保中英文不失分，可考慮特色專業。";
+        } else {
+            unis = ["中山大學", "暨南大學", "華南師範"];
+            strategy = "穩紮穩打確保過線，暨南大學是熱門選擇。";
+        }
+
+        document.getElementById('res-major').innerText = "根據輸入，建議申請以下院校";
+        document.getElementById('res-strategy').innerText = strategy;
+        
+        const container = document.getElementById('res-unis');
+        container.innerHTML = '';
+        unis.forEach(u => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.style.cssText = 'background:#f6ffed;color:#52c41a;border-color:#b7eb8f';
+            span.innerText = u;
+            container.appendChild(span);
+        });
+        
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ========== 🔥 核心功能：從 Google Sheets 自動讀取日期 ==========
+    
+    // 📌 請將下面的 URL 替換為你自己的 Google Sheets 發佈連結
+    // 設定教學見下方註釋
+    const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0';
+    
+    // 備用日期（如果讀取失敗時使用）
+    const FALLBACK_DATES = {
+        baosong: '2025-11-15',
+        fourUni: '2025-12-20'
+    };
+
+    // 解析 CSV 內容（格式：key,value）
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        const result = {};
+        lines.forEach(line => {
+            const [key, value] = line.split(',').map(s => s.trim());
+            if (key && value) result[key] = value;
+        });
+        return result;
+    }
+
+    // 倒數計時函數
+    function startCountdown(elementId, targetDateStr) {
+        const el = document.getElementById(elementId);
+        const target = new Date(targetDateStr).getTime();
+        
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = target - now;
+            
+            if (diff <= 0) {
+                el.innerHTML = "已截止";
+                el.style.color = "#FF4D4F";
+                clearInterval(timer);
+                return;
+            }
+            
+            const days = Math.floor(diff / (1000*60*60*24));
+            const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            el.innerHTML = `${days}天 ${hours}小時`;
+        }, 1000);
+    }
+
+    // 載入雲端日期並啟動倒數
+    async function loadDeadlinesFromCloud() {
+        const statusEl = document.getElementById('data-status');
+        
+        try {
+            // 嘗試從 Google Sheets 讀取
+            const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+            if (!response.ok) throw new Error('Network error');
+            
+            const csvText = await response.text();
+            const dates = parseCSV(csvText);
+            
+            // 更新 UI
+            document.getElementById('data-source').innerText = 'Google Sheets (已同步)';
+            statusEl.innerText = '✅ 實時同步中';
+            statusEl.className = 'status-badge status-live';
+            document.getElementById('baosong-last-update').innerText = new Date().toLocaleString('zh-HK');
+            
+            // 啟動倒數
+            if (dates['保送截止']) startCountdown('timer-baosong', dates['保送截止']);
+            if (dates['四校截止']) startCountdown('timer-4u', dates['四校截止']);
+            
+            console.log('✅ 日期已從雲端同步:', dates);
+            
+        } catch (error) {
+            // 讀取失敗時使用備用日期
+            console.warn('⚠️ 無法讀取雲端日期，使用備用值:', error);
+            
+            document.getElementById('data-source').innerText = '本地備用配置';
+            statusEl.innerText = '⚠️ 離線模式';
+            statusEl.className = 'status-badge status-demo';
+            
+            startCountdown('timer-baosong', FALLBACK_DATES.baosong);
+            startCountdown('timer-4u', FALLBACK_DATES.fourUni);
+        }
+    }
+
+    // ========== 頁面載入時執行 ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDeadlinesFromCloud();
+    });
+
+</script>
+
+<!-- 
+🔧🔧🔧 如何設定 Google Sheets 自動同步日期 🔧🔧🔧
+
+1️⃣ 建立 Google 表格
+   - 打開 https://sheets.google.com
+   - 新建表格，第一列寫：
+     ```
+     保送截止,2025-11-15
+     四校截止,2025-12-20
+     ```
+
+2️⃣ 發佈為 CSV
+   - 點擊「檔案」→「共用」→「發佈到網路」
+   - 選擇「整個文件」+「CSV」
+   - 點擊「發佈」，複製產生的連結
+
+3️⃣ 替換代碼中的 URL
+   - 找到這一行：
+     const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/...';
+   - 將 YOUR_SHEET_ID 換成你剛複製的連結中的 ID
+   - 或者直接替換整行 URL
+
+4️⃣ 完成！✅
+   - 以後要改日期，只需在 Google Sheets 裡修改，保存後全站自動更新
+   - 無需改代碼、無需重新上傳文件
+
+💡 小提示：
+   - Google Sheets 連結格式範例：
+     https://docs.google.com/spreadsheets/d/1ABC2DEF3GHI4JKL5MNO/export?format=csv&gid=0
+   - 其中的 1ABC2DEF3GHI4JKL5MNO 就是你的 Sheet ID
+
+-->
+
+</body>
+</html>
